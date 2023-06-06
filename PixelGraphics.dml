@@ -5,6 +5,8 @@ domain PixelGraphics
     object      Graphic;
     object      Tile;
     object      Pixel;
+    object      Palette;
+    object      ColorWell;
 
     type        ExitCode    : EnumType [ cpp_castable_to_int=true; ]
                 {

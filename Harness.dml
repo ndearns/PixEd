@@ -1,24 +1,41 @@
 object Harness
 {
-    attr        img     : Image;
-    attr        tex     : Texture;
-    attr        mpos    : Vector2;
-    attr        mdown   : Boolean;
+    attr        img       : Image;
+    attr        tex       : Texture;
+    attr        mpos      : Vector2;
+    attr        mdown     : Boolean;
+    attr        sdown     : Boolean;
+    attr        bcolor    : Color;
+    attr        p_span    : Coord;  "number of screen pixels in Pixel or ColorWell"
+    attr        x_tile    : Coord;
+    attr        y_tile    : Coord;
+    attr        x_palette : Coord;
+    attr        y_palette : Coord;
 
-    relation    ui         : Harness -> Raylib;
-    relation    graphic    : Harness -> Graphic;
-    relation    uses_tile  : Harness -> Tile;
-    relation    uses_pixel : Harness -> Pixel;
+    relation    ui              : Harness -> Raylib;
+    relation    graphic         : Harness -> Graphic;
+    relation    uses_tile       : Harness -> Tile;
+    relation    uses_pixel      : Harness -> Pixel;
+    relation    palette         : Harness -> Palette;
+    relation    uses_color_well : Harness -> ColorWell;
 
     proc        main() : ExitCode 
                 {
                     let the_harness : Harness = new Harness;
                     let the_ui      : Raylib  = new Raylib;
                     let the_graphic : Graphic = new Graphic;
+                    let the_palette : Palette = new Palette;
 
+                    call the_harness.set_p_span( 32 );
+                    call the_harness.set_x_tile( 100 );
+                    call the_harness.set_y_tile( 100 );
+                    call the_harness.set_x_palette( 650);
+                    call the_harness.set_y_palette( 100 );
                     call the_harness.ui_link( the_ui );
                     call the_harness.graphic_link( the_graphic );
                     call the_graphic.initialise();
+                    call the_harness.palette_link( the_palette );
+                    call the_palette.initialise();
 
                         call PixelGraphics::swa.println('PixelGraphics running...');
 
@@ -31,8 +48,8 @@ object Harness
 
     proc        start()
                 {
-                    call self.ui().init_window( 1200,
-                                                1200,
+                    call self.ui().init_window( 850,
+                                                700,
                                                 'PixelGraphics dev harness' );
 
                     call self.ui().set_target_fps( 60 );
@@ -66,12 +83,16 @@ object Harness
 
                                     "get key inputs"
 
-
+                    call self.set_sdown( ui().is_key_down( KEY_LEFT_SHIFT ) );
 
                                     "call game logic"
 
-                    let hit : Boolean = mdown_on_tile_grid();
-                    if mdown() and hit => paint_pixel_under_mouse();
+                    let tile_hit : Boolean = mdown_on_tile_grid();
+                    if mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
+                    if mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
+
+                    let palette_hit : Boolean = mdown_on_palette_grid();
+                    if mdown() and palette_hit => select_color_well_under_mouse();
 
                     call EventQueue::defaultEQ().service_queue();
 
@@ -82,20 +103,46 @@ object Harness
                         call ui().clear_background( WHITE );
                         call ui().draw_texture( tex(), 300, 300, WHITE);
                         call self.draw_graphic();
+                        call self.draw_palette();
                         call self.draw_grid();
                         call self.draw_time();
-                        if   mdown() and mdown_on_tile_grid() => call self.draw_mouse_coords();
+                        "if   mdown() and mdown_on_tile_grid() => call self.draw_mouse_coords();"
 
                     call ui().end_drawing();
+                };
+
+    proc        select_color_well_under_mouse()
+                {
+                    let  x : Coord = 0;
+                    let  y : Coord = 0;
+                    set  x = ((((Coord)self.mpos()..x) - self.x_palette()) / self.p_span());
+                    set  y = ((((Coord)self.mpos()..y) - self.y_palette()) / self.p_span());
+                    call self.set_bcolor( self.palette().color_wells()[y*3 + x].color() );
+                };
+
+    proc        mdown_on_palette_grid() : Boolean
+                {
+                    let result : Boolean = false;
+                    let dx : Coord = 0;
+                    set dx = self.x_palette() + (self.p_span() * 3);
+                    let dy : Coord = 0;
+                    set dy = self.y_palette() + 
+                            (self.p_span() * (Coord)(self.palette().color_wells()..size()) / 3);
+
+                    if self.x_palette() < mpos()..x and mpos()..x < dx and
+                       self.y_palette() < mpos()..y and mpos()..y < dy
+                       =>
+                          set result = true;
+                    return result;
                 };
 
     proc        mdown_on_tile_grid() : Boolean
                 {
                     let result : Boolean = false;
                     let tile_span  : Coord = (Coord)16;
-                    let pixel_span : Coord = (Coord)32;
-                    let x : Coord = (Coord)100;
-                    let y : Coord = (Coord)100;
+                    let pixel_span : Coord = (Coord)self.p_span();
+                    let x : Coord = (Coord)self.x_tile();
+                    let y : Coord = (Coord)self.y_tile();
                     let dx : Coord = (Coord)0;
                     let dy : Coord = (Coord)0;
                     set dx = x + (tile_span * pixel_span);
@@ -110,15 +157,48 @@ object Harness
 
     proc        paint_pixel_under_mouse()
                 {
-                    let margin : Coord = 100;
-                    let pixel_span : Coord = 32;
-                    let  x : Coord = (Coord)0;
-                    let  y : Coord = (Coord)0;
-                    set  x = ((((Coord)self.mpos()..x) - margin) / pixel_span);
-                    set  y = ((((Coord)self.mpos()..y) - margin) / pixel_span);
+                    let pixel_span : Coord = self.graphic().grid_span();
+                    let  x : Coord = 0;
+                    let  y : Coord = 0;
+                    set  x = ((((Coord)self.mpos()..x) - self.x_tile()) / pixel_span);
+                    set  y = ((((Coord)self.mpos()..y) - self.y_tile()) / pixel_span);
                     foreach pix : self.graphic().tiles()[0].pixels()
                         | pix.x() = x and pix.y() = y
-                        => call pix.set_color( PINK );
+                        => call pix.set_color( self.bcolor() );
+                };
+
+    proc        erase_pixel_under_mouse()
+                {
+                    let pixel_span : Coord = self.graphic().grid_span();
+                    let  x : Coord = 0;
+                    let  y : Coord = 0;
+                    set  x = ((((Coord)self.mpos()..x) - self.x_tile()) / pixel_span);
+                    set  y = ((((Coord)self.mpos()..y) - self.y_tile()) / pixel_span);
+                    foreach pix : self.graphic().tiles()[0].pixels()
+                        | pix.x() = x and pix.y() = y
+                        => call pix.set_color( self.graphic().background_color() );
+                };
+
+    proc        draw_palette()
+                {
+                    foreach n : Coord | 0 <= n and n < self.palette().color_wells()..size()
+                        => call self.draw_color_well( n );
+                    call ui().draw_rectangle_lines(
+                            self.x_palette(), self.y_palette(),
+                            3 * self.p_span(), (self.palette().color_wells()..size() / 3) * self.p_span(),
+                            DARKGRAY
+                    );
+                };
+
+    proc        draw_color_well( n : Coord )
+                {
+                    let x_well : Coord = 0;
+                    let y_well : Coord = 0;
+
+                    set x_well = self.x_palette() + (self.p_span() * (n%3));
+                    set y_well = self.y_palette() + ((n/3) * self.p_span());
+                    call ui().draw_rectangle( x_well, y_well, self.p_span(), self.p_span(),
+                                              self.palette().color_wells()[n].color());
                 };
 
     proc        draw_graphic()
@@ -136,10 +216,10 @@ object Harness
     proc        draw_pixel( p : Pixel )
                 {
                     let x : Coord = 0;
-                    set x = 100 + (32 * p.x());
+                    set x = self.x_tile() + (self.p_span() * p.x());
                     let y : Coord = 0;
-                    set y = 100 + (32 * p.y());
-                    call ui().draw_rectangle( x, y, 32, 32, p.color());
+                    set y = self.y_tile() + (self.p_span() * p.y());
+                    call ui().draw_rectangle( x, y, self.p_span(), self.p_span(), p.color());
                 };
 
     proc        draw_grid()
@@ -151,20 +231,20 @@ object Harness
     proc        draw_grid_cell( n : Coord )
                 {
                     let x : Coord = 0;
-                    set x = 100 + (32 * (n%16));
+                    set x = self.x_tile() + (self.p_span() * (n%16));
                     let y : Coord = 0;
-                    set y = 100 + (32 * (n/16));
-                    call ui().draw_rectangle_lines( x, y, 32, 32, LIGHTGRAY);
+                    set y = self.y_tile() + (self.p_span() * (n/16));
+                    call ui().draw_rectangle_lines( x, y, self.p_span(), self.p_span(), LIGHTGRAY);
                 };
 
     proc        draw_mouse_coords() {
-                    call ui().draw_text( mpos()..x, 20, 50, 32, BLACK );
-                    call ui().draw_text( mpos()..y, 20, 80, 32, BLACK );
+                    call ui().draw_text( mpos()..x, 20, 50, self.p_span(), BLACK );
+                    call ui().draw_text( mpos()..y, 20, 80, self.p_span(), BLACK );
                 };
 
     proc        draw_time()
                 {
                     let  screen_width : Coord = ui().get_screen_width();
-                    call ui().draw_text( ui().time_HHMMSS(), (screen_width/2) - 80, 20, 32, PINK );
+                    call ui().draw_text( ui().time_HHMMSS(), (screen_width/2) - 80, 20, self.p_span(), PINK );
                 };
 };

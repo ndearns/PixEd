@@ -1,0 +1,50 @@
+object Palette
+{
+    relation    color_wells : Palette -> <ColorWell>;
+
+    proc initialise()
+    {
+        call self.add_color_well( WHITE );
+        call self.add_color_well( BLACK );
+        call self.add_color_well( BLANK );
+        
+        call self.add_color_well( LIGHTGRAY );
+        call self.add_color_well( GRAY );
+        call self.add_color_well( DARKGRAY );
+        
+        call self.add_color_well( YELLOW );
+        call self.add_color_well( GOLD );
+        call self.add_color_well( ORANGE );
+        
+        call self.add_color_well( PINK );
+        call self.add_color_well( RED );
+        call self.add_color_well( MAROON );
+        
+        call self.add_color_well( GREEN );
+        call self.add_color_well( LIME );
+        call self.add_color_well( DARKGREEN );
+        
+        call self.add_color_well( SKYBLUE );
+        call self.add_color_well( BLUE );
+        call self.add_color_well( DARKBLUE );
+
+        call self.add_color_well( PURPLE );
+        call self.add_color_well( VIOLET );
+        call self.add_color_well( DARKPURPLE );
+
+        call self.add_color_well( BEIGE );
+        call self.add_color_well( BROWN );
+        call self.add_color_well( DARKBROWN );
+
+        call self.add_color_well( MAGENTA );
+        call self.add_color_well( RAYWHITE );
+        call self.add_color_well( NDEWHITE );
+    };
+
+    proc add_color_well( color : Color )
+    {
+        let  well : ColorWell = new ColorWell;
+        call well.set_color( color );
+        call self.color_wells_link( well );
+    };
+};

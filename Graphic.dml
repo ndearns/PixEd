@@ -1,15 +1,19 @@
 object Graphic 
 {
-    attr        dx : Size;
-    attr        dy : Size;
+    attr        tile_span        : Size;
+    attr        grid_span        : Size;
+    attr        background_color : Color;
 
     relation    tiles : Graphic -> <Tile>;
 
     proc        initialise()
                 {
+                    call set_grid_span( 32 );
+                    call set_tile_span( 16 );
+                    call set_background_color( NDEWHITE );
                     let  tile : Tile = new Tile;
-                    call self. tiles_link( tile );
+                    call self.tiles_link( tile );
 
-                    call tile.initialise();
+                    call tile.initialise( self );
                 };
 };

@@ -5,11 +5,13 @@ object Tile
     attr        span      : Size;
     attr        image_ref : ImageRef;
 
+    relation    graphic   : Tile -> Graphic;
     relation    pixels    : Tile -> <Pixel>;
 
-    proc        initialise()
+    proc        initialise( graphic : Graphic )
                 {
-                    call self.set_span( 16 );
+                    call self.graphic_link( graphic );
+                    call self.set_span( graphic.tile_span() );
                     foreach n : Coord | 0 <= n and n < (span()*span())
                         => call make_pixel( n );
                 };
@@ -19,7 +21,7 @@ object Tile
                     let  p : Pixel = new Pixel;
                     call p.set_x( n % span() );
                     call p.set_y( n / span() );
-                    call p.set_color( NDEWHITE );
+                    call p.set_color( self.graphic().background_color() );
                     call self.pixels_link( p );
                 };
 };

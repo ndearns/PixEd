@@ -2,7 +2,7 @@ CC = g++
 CCFLAGS = -std=c++2a -g -Wall
 GEN_MODE = async
 DML_DOM = PixelGraphics
-DML_OBJS= Harness Graphic Tile Pixel
+DML_OBJS= Harness Graphic Tile Pixel Palette ColorWell
 LIBS= -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 run: EventQueue.o *.dml $(DML_DOM)Provided.h Raylib.h
