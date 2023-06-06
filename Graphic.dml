@@ -6,10 +6,10 @@ object Graphic
 
     relation    tiles : Graphic -> <Tile>;
 
-    proc        initialise()
+    proc        initialise( t_res : Coord, p_span : Coord )
                 {
-                    call set_grid_span( 32 );
-                    call set_tile_span( 16 );
+                    call set_grid_span( p_span );
+                    call set_tile_span( t_res );
                     call set_background_color( NDEWHITE );
                     let  tile : Tile = new Tile;
                     call self.tiles_link( tile );

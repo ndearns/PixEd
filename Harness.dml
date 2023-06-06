@@ -1,16 +1,28 @@
 object Harness
 {
-    attr        img       : Image;
-    attr        tex       : Texture;
-    attr        mpos      : Vector2;
-    attr        mdown     : Boolean;
-    attr        sdown     : Boolean;
-    attr        bcolor    : Color;
-    attr        p_span    : Coord;  "number of screen pixels in Pixel or ColorWell"
-    attr        x_tile    : Coord;
-    attr        y_tile    : Coord;
-    attr        x_palette : Coord;
-    attr        y_palette : Coord;
+    attr        img             : Image;
+    attr        tex             : Texture;
+    attr        mpos            : Vector2;
+    attr        mdown           : Boolean;
+    attr        sdown           : Boolean;
+    attr        bcolor          : Color;
+    attr        t_res           : Coord;  "number of tile pixels in Tile side"
+    attr        p_span          : Coord;  "number of screen pixels in Pixel or ColorWell"
+    attr        x_tile          : Coord;
+    attr        y_tile          : Coord;
+    attr        x_palette       : Coord;
+    attr        y_palette       : Coord;
+    attr        x_save          : Coord;
+    attr        y_save          : Coord;
+    attr        x_add_tile      : Coord;
+    attr        y_add_tile      : Coord;
+    attr        x_del_tile      : Coord;
+    attr        y_del_tile      : Coord;
+    attr        x_next_tile     : Coord;
+    attr        y_next_tile     : Coord;
+    attr        x_prev_tile     : Coord;
+    attr        y_prev_tile     : Coord;
+
 
     relation    ui              : Harness -> Raylib;
     relation    graphic         : Harness -> Graphic;
@@ -26,14 +38,18 @@ object Harness
                     let the_graphic : Graphic = new Graphic;
                     let the_palette : Palette = new Palette;
 
+                    call the_harness.set_t_res( 24 );
                     call the_harness.set_p_span( 32 );
-                    call the_harness.set_x_tile( 100 );
-                    call the_harness.set_y_tile( 100 );
-                    call the_harness.set_x_palette( 650);
-                    call the_harness.set_y_palette( 100 );
+                    call the_harness.set_x_tile( 3 * the_harness.p_span() );
+                    call the_harness.set_y_tile( 3 * the_harness.p_span() );
+                    call the_harness.set_x_palette( 
+                                     the_harness.x_tile() +
+                                     the_harness.p_span() +
+                                    (the_harness.t_res() * the_harness.p_span()) );
+                    call the_harness.set_y_palette( 3 * the_harness.p_span() );
                     call the_harness.ui_link( the_ui );
                     call the_harness.graphic_link( the_graphic );
-                    call the_graphic.initialise();
+                    call the_graphic.initialise( the_harness.t_res(), the_harness.p_span() );
                     call the_harness.palette_link( the_palette );
                     call the_palette.initialise();
 
@@ -48,8 +64,8 @@ object Harness
 
     proc        start()
                 {
-                    call self.ui().init_window( 850,
-                                                700,
+                    call self.ui().init_window( (3 * p_span()) + (t_res() * p_span()) + (7*p_span()),
+                                                (3 * p_span()) + (t_res() * p_span()) + (3*p_span()),
                                                 'PixelGraphics dev harness' );
 
                     call self.ui().set_target_fps( 60 );
@@ -139,7 +155,7 @@ object Harness
     proc        mdown_on_tile_grid() : Boolean
                 {
                     let result : Boolean = false;
-                    let tile_span  : Coord = (Coord)16;
+                    let tile_span  : Coord = (Coord)self.t_res();
                     let pixel_span : Coord = (Coord)self.p_span();
                     let x : Coord = (Coord)self.x_tile();
                     let y : Coord = (Coord)self.y_tile();
@@ -224,16 +240,16 @@ object Harness
 
     proc        draw_grid()
                 {
-                    foreach n : Coord | 0 <= n and n < (16*16)
+                    foreach n : Coord | 0 <= n and n < (self.t_res()*self.t_res())
                         => call self.draw_grid_cell( n );
                 };
 
     proc        draw_grid_cell( n : Coord )
                 {
                     let x : Coord = 0;
-                    set x = self.x_tile() + (self.p_span() * (n%16));
+                    set x = self.x_tile() + (self.p_span() * (n%self.t_res()));
                     let y : Coord = 0;
-                    set y = self.y_tile() + (self.p_span() * (n/16));
+                    set y = self.y_tile() + (self.p_span() * (n/self.t_res()));
                     call ui().draw_rectangle_lines( x, y, self.p_span(), self.p_span(), LIGHTGRAY);
                 };
 
