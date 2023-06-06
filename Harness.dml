@@ -1,0 +1,170 @@
+object Harness
+{
+    attr        img     : Image;
+    attr        tex     : Texture;
+    attr        mpos    : Vector2;
+    attr        mdown   : Boolean;
+
+    relation    ui         : Harness -> Raylib;
+    relation    graphic    : Harness -> Graphic;
+    relation    uses_tile  : Harness -> Tile;
+    relation    uses_pixel : Harness -> Pixel;
+
+    proc        main() : ExitCode 
+                {
+                    let the_harness : Harness = new Harness;
+                    let the_ui      : Raylib  = new Raylib;
+                    let the_graphic : Graphic = new Graphic;
+
+                    call the_harness.ui_link( the_ui );
+                    call the_harness.graphic_link( the_graphic );
+                    call the_graphic.initialise();
+
+                        call PixelGraphics::swa.println('PixelGraphics running...');
+
+                    call the_harness.start();
+
+                    call the_harness.ui_unlink();
+
+                    return ExitCode::Ok;
+                };
+
+    proc        start()
+                {
+                    call self.ui().init_window( 1200,
+                                                1200,
+                                                'PixelGraphics dev harness' );
+
+                    call self.ui().set_target_fps( 60 );
+
+                          "window initialised; can now load textures"
+
+                    call self.set_img( ui().load_image( 'dev_image.png' ) );
+                    call self.set_tex( ui().load_texture( 'BlueTile.png' ) );
+
+                            "loop infinitely, until window closed"
+
+                    foreach i : FrameCount
+                        | 0 <= i and !ui().window_should_close()
+                            =>
+                                call self.do_frame( i );
+
+                    call self.ui().close_window();
+                };
+
+    proc        do_frame( frame_number : FrameCount ) 
+                {
+                                    "deal with timers"
+
+                                   "get mouse inputs"
+
+                    call set_mdown( false );
+                    if ui().mouse_button_is_down( 0 )
+                        => call set_mdown( true );
+
+                    call self.set_mpos( ui().get_mouse_position() );
+
+                                    "get key inputs"
+
+
+
+                                    "call game logic"
+
+                    let hit : Boolean = mdown_on_tile_grid();
+                    if mdown() and hit => paint_pixel_under_mouse();
+
+                    call EventQueue::defaultEQ().service_queue();
+
+                                        "render"
+
+                    call ui().begin_drawing();
+
+                        call ui().clear_background( WHITE );
+                        call ui().draw_texture( tex(), 300, 300, WHITE);
+                        call self.draw_graphic();
+                        call self.draw_grid();
+                        call self.draw_time();
+                        if   mdown() and mdown_on_tile_grid() => call self.draw_mouse_coords();
+
+                    call ui().end_drawing();
+                };
+
+    proc        mdown_on_tile_grid() : Boolean
+                {
+                    let result : Boolean = false;
+                    let tile_span  : Coord = (Coord)16;
+                    let pixel_span : Coord = (Coord)32;
+                    let x : Coord = (Coord)100;
+                    let y : Coord = (Coord)100;
+                    let dx : Coord = (Coord)0;
+                    let dy : Coord = (Coord)0;
+                    set dx = x + (tile_span * pixel_span);
+                    set dy = y + (tile_span * pixel_span);
+
+                    if x < mpos()..x and mpos()..x < dx and
+                       y < mpos()..y and mpos()..y < dy
+                       =>
+                          set result = true;
+                    return result;
+                };
+
+    proc        paint_pixel_under_mouse()
+                {
+                    let margin : Coord = 100;
+                    let pixel_span : Coord = 32;
+                    let  x : Coord = (Coord)0;
+                    let  y : Coord = (Coord)0;
+                    set  x = ((((Coord)self.mpos()..x) - margin) / pixel_span);
+                    set  y = ((((Coord)self.mpos()..y) - margin) / pixel_span);
+                    foreach pix : self.graphic().tiles()[0].pixels()
+                        | pix.x() = x and pix.y() = y
+                        => call pix.set_color( PINK );
+                };
+
+    proc        draw_graphic()
+                {
+                    foreach tile : self.graphic().tiles()
+                        => call self.draw_tile( tile );
+                };
+
+    proc        draw_tile( tile : Tile )
+                {
+                    foreach p : tile.pixels()
+                        => call self.draw_pixel( p );
+                };
+
+    proc        draw_pixel( p : Pixel )
+                {
+                    let x : Coord = 0;
+                    set x = 100 + (32 * p.x());
+                    let y : Coord = 0;
+                    set y = 100 + (32 * p.y());
+                    call ui().draw_rectangle( x, y, 32, 32, p.color());
+                };
+
+    proc        draw_grid()
+                {
+                    foreach n : Coord | 0 <= n and n < (16*16)
+                        => call self.draw_grid_cell( n );
+                };
+
+    proc        draw_grid_cell( n : Coord )
+                {
+                    let x : Coord = 0;
+                    set x = 100 + (32 * (n%16));
+                    let y : Coord = 0;
+                    set y = 100 + (32 * (n/16));
+                    call ui().draw_rectangle_lines( x, y, 32, 32, LIGHTGRAY);
+                };
+
+    proc        draw_mouse_coords() {
+                    call ui().draw_text( mpos()..x, 20, 50, 32, BLACK );
+                    call ui().draw_text( mpos()..y, 20, 80, 32, BLACK );
+                };
+
+    proc        draw_time()
+                {
+                    let  screen_width : Coord = ui().get_screen_width();
+                    call ui().draw_text( ui().time_HHMMSS(), (screen_width/2) - 80, 20, 32, PINK );
+                };
+};

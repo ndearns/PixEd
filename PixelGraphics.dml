@@ -1,0 +1,23 @@
+domain PixelGraphics
+{
+    object      Harness;
+    object      Raylib [ archetypes='provided'; ];
+    object      Graphic;
+    object      Tile;
+    object      Pixel;
+
+    type        ExitCode    : EnumType [ cpp_castable_to_int=true; ]
+                {
+                    Ok,
+                    Error
+                };
+    type        Vector2     : ProvidedType;
+    type        Texture     : ProvidedType;
+    type        Image       : ProvidedType;
+    type        Color       : ProvidedType;
+    type        ImageRef    : NumericType [ cpp_type='void *'; ];
+    type        FrameCount  : NumericType [ cpp_type='size_t'; ];
+    type        Coord       : NumericType [ cpp_type='uint16_t'; ];
+    type        Size        : NumericType [ cpp_type='uint16_t'; ];
+    type        Boolean     : ProvidedType;
+};

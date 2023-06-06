@@ -1,0 +1,26 @@
+object Tile
+[
+]
+{
+    attr        span      : Size;
+    attr        image_ref : ImageRef;
+
+    relation    pixels    : Tile -> <Pixel>;
+
+    proc        initialise()
+                {
+                    call self.set_span( 16 );
+                    foreach n : Coord | 0 <= n and n < (span()*span())
+                        => call make_pixel( n );
+                };
+
+    proc        make_pixel( n : Coord )
+                {
+                    let  p : Pixel = new Pixel;
+                    call p.set_x( n % span() );
+                    call p.set_y( n / span() );
+                    call p.set_color( NDEWHITE );
+                    call self.pixels_link( p );
+                };
+};
+

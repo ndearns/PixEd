@@ -1,0 +1,15 @@
+object Graphic 
+{
+    attr        dx : Size;
+    attr        dy : Size;
+
+    relation    tiles : Graphic -> <Tile>;
+
+    proc        initialise()
+                {
+                    let  tile : Tile = new Tile;
+                    call self. tiles_link( tile );
+
+                    call tile.initialise();
+                };
+};

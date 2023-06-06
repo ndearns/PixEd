@@ -1,0 +1,6 @@
+object Pixel 
+{
+    attr        x       : Coord;
+    attr        y       : Coord;
+    attr        color   : Color;
+};
