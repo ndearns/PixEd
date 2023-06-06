@@ -4,8 +4,9 @@ Pixel Art Editor
 
 A dml tile editor that's really, really, simple, unlike all the pixel art editors I've looked at so far.
 
-- Tiles are 32x32.  
-- A new Graphic starts with one Tile and you can add more.
++ Tiles are 16x16.  
+- A new Graphic starts with one Tile 
+- And you can add more.
 - A Palette presents 16 default colors in Color wells.  
 - The Palette is saved with the Graphic.
 - A Color has R, G, B and Alpha values.
