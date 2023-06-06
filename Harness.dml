@@ -120,9 +120,13 @@ object Harness
                         call ui().draw_texture( tex(), 300, 300, WHITE);
                         call self.draw_graphic();
                         call self.draw_palette();
-                        call self.draw_grid();
+                        call self.draw_prev_button();
+                        call self.draw_next_button();
+                        call self.draw_add_button();
+                        call self.draw_del_button();
+                        call self.draw_save_button();
+                        call self.draw_load_button();
                         call self.draw_time();
-                        "if   mdown() and mdown_on_tile_grid() => call self.draw_mouse_coords();"
 
                     call ui().end_drawing();
                 };
@@ -195,6 +199,66 @@ object Harness
                         => call pix.set_color( self.graphic().background_color() );
                 };
 
+    proc        draw_next_button()
+                {
+                    let x : Coord = 0;
+                    set x = (3*p_span()) + (t_res()*p_span()) + (2*p_span());
+                    let y : Coord = 0;
+                    set y = (3*p_span()) + (t_res()*p_span()) - (3*p_span());
+                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '>>', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                };
+
+    proc        draw_prev_button()
+                {
+                    let x : Coord = 0;
+                    set x = (3*p_span()) + (t_res()*p_span()) + (1*p_span());
+                    let y : Coord = 0;
+                    set y = (3*p_span()) + (t_res()*p_span()) - (3*p_span());
+                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '<<', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                };
+
+    proc        draw_add_button()
+                {
+                    let x : Coord = 0;
+                    set x = (3*p_span()) + (t_res()*p_span()) + (1*p_span());
+                    let y : Coord = 0;
+                    set y = (3*p_span()) + (t_res()*p_span()) - (2*p_span());
+                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '+', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                };
+
+    proc        draw_del_button()
+                {
+                    let x : Coord = 0;
+                    set x = (3*p_span()) + (t_res()*p_span()) + (2*p_span());
+                    let y : Coord = 0;
+                    set y = (3*p_span()) + (t_res()*p_span()) - (2*p_span());
+                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '-', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                };
+
+    proc        draw_save_button()
+                {
+                    let x : Coord = 0;
+                    set x = (3*p_span()) + (t_res()*p_span()) + (1*p_span());
+                    let y : Coord = 0;
+                    set y = (3*p_span()) + (t_res()*p_span()) - (1*p_span());
+                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( 'S', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                };
+
+    proc        draw_load_button()
+                {
+                    let x : Coord = 0;
+                    set x = (3*p_span()) + (t_res()*p_span()) + (2*p_span());
+                    let y : Coord = 0;
+                    set y = (3*p_span()) + (t_res()*p_span()) - (1*p_span());
+                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( 'L', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                };
+
     proc        draw_palette()
                 {
                     foreach n : Coord | 0 <= n and n < self.palette().color_wells()..size()
@@ -221,6 +285,7 @@ object Harness
                 {
                     foreach tile : self.graphic().tiles()
                         => call self.draw_tile( tile );
+                    call self.draw_graphic_grid();
                 };
 
     proc        draw_tile( tile : Tile )
@@ -238,7 +303,7 @@ object Harness
                     call ui().draw_rectangle( x, y, self.p_span(), self.p_span(), p.color());
                 };
 
-    proc        draw_grid()
+    proc        draw_graphic_grid()
                 {
                     foreach n : Coord | 0 <= n and n < (self.t_res()*self.t_res())
                         => call self.draw_grid_cell( n );
