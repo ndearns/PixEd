@@ -8,20 +8,20 @@ A dml tile editor that's really, really, simple, unlike all the pixel art editor
 - [x] A new Graphic starts with one Tile 
 - [x] Tile Pixels can be painted.
 - [ ] New Tiles can be added.
-- [ ] A Palette presents 16 default colors in Color wells.  
+- [x] A Palette presents the 27 #defined raylib colors in Color wells.  
 - [ ] The Palette is saved with the Graphic.
-- [ ] A Color has R, G, B and Alpha values.
+- [x] A Color has R, G, B and Alpha values.
 - [ ] The Palette has a Mixer well.
-- [ ] The Brush can transfer paint from Color wells to the Mixer well.
+- [x] The Brush can transfer paint from Color wells to the Mixer well.
 - [ ] The Mixer well blends the Colors transferred to it.
 - [ ] The Mixer well can be wiped clean.
 - [ ] The Mixer well Color can be assigned to a Color well.
 - [ ] The black and white Color wells cannot be overridden.  They are always available to adjust the mixer Color brightness. 
 - [ ] Graphics can be exported to PNG files.
-- [ ] A Brush can be dipped in a Color and the Color painted onto the Tile.
-- [ ] An Eraser erases the Color in pixels, setting them to the background color.
+- [x] A Brush can be dipped in a Color Well and the Color painted onto the Tile.
+- [x] An Eraser erases the Color in pixels, setting them to the background color, with shift-paint.
 - [ ] The background Color can be set for the Graphic.
-- [ ] The default background is transparent.
+- [x] The default background is off white.
 - [ ] A new Tile can be created in the sequence of existing Tiles.
 - [ ] A new Tile can be created as a copy of an existing Tile.
 - [ ] A Tile can be cleared.
