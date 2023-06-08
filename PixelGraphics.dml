@@ -21,5 +21,6 @@ domain PixelGraphics
     type        FrameCount  : NumericType [ cpp_type='size_t'; ];
     type        Coord       : NumericType [ cpp_type='uint16_t'; ];
     type        Size        : NumericType [ cpp_type='uint16_t'; ];
+    type        Label       : NumericType [ cpp_type='std::string'; ];
     type        Boolean     : ProvidedType;
 };

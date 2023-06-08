@@ -54,6 +54,8 @@ class Raylib {
         { ClearBackground( color );};
     void draw_fps( int x, int y )
         { DrawFPS( x, y ); };
+    void draw_text(std::string text, int x, int y, int fontSize, Color color)
+        { DrawText(text.c_str(), x, y, fontSize, color);};
     void draw_text(const char* text, int x, int y, int fontSize, Color color)
         { DrawText(text, x, y, fontSize, color);};
     void draw_text(float f, int x, int y, int fontSize, Color color)
