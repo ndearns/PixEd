@@ -36,8 +36,10 @@ class Raylib {
         };
     bool mouse_button_is_down(int button)  
         { return IsMouseButtonDown(button); };
-    bool is_mouse_button_pressed(int button)  
+    bool mouse_button_pressed(int button)  
         { return IsMouseButtonPressed(button); };
+    bool mouse_button_released(int button)  
+        { return IsMouseButtonReleased(button); };
     Vector2 get_mouse_position()    
         { return GetMousePosition(); };
     uint16_t get_screen_width()

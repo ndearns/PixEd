@@ -16,4 +16,10 @@ object Graphic
 
                     call tile.initialise( self );
                 };
+    proc        add_tile( ) 
+                {
+                    let tile : Tile = new Tile;
+                    call self.tiles_link( tile );
+                    call tile.initialise( self );
+                };
 };

@@ -4,6 +4,7 @@ object Harness
     attr        tex             : Texture;
     attr        mpos            : Vector2;
     attr        mdown           : Boolean;
+    attr        mpressed        : Boolean;
     attr        sdown           : Boolean;
     attr        bcolor          : Color;
     attr        t_res           : Coord;  "number of tile pixels in Tile side"
@@ -12,8 +13,10 @@ object Harness
     attr        y_tile          : Coord;
     attr        x_palette       : Coord;
     attr        y_palette       : Coord;
-    attr        x_save          : Coord;
-    attr        y_save          : Coord;
+    attr        x_save_tile     : Coord;
+    attr        y_save_tile     : Coord;
+    attr        x_load_tile     : Coord;
+    attr        y_load_tile     : Coord;
     attr        x_add_tile      : Coord;
     attr        y_add_tile      : Coord;
     attr        x_del_tile      : Coord;
@@ -22,11 +25,12 @@ object Harness
     attr        y_next_tile     : Coord;
     attr        x_prev_tile     : Coord;
     attr        y_prev_tile     : Coord;
+    attr        edit_tile_index : Coord;
 
 
     relation    ui              : Harness -> Raylib;
     relation    graphic         : Harness -> Graphic;
-    relation    uses_tile       : Harness -> Tile;
+    relation    edit_tile       : Harness -> Tile;
     relation    uses_pixel      : Harness -> Pixel;
     relation    palette         : Harness -> Palette;
     relation    uses_color_well : Harness -> ColorWell;
@@ -47,9 +51,59 @@ object Harness
                                      the_harness.p_span() +
                                     (the_harness.t_res() * the_harness.p_span()) );
                     call the_harness.set_y_palette( 3 * the_harness.p_span() );
+                    call the_harness.set_x_add_tile(
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) + 
+                                    (1*the_harness.p_span()) );
+                    call the_harness.set_y_add_tile( 
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) - 
+                                    (2*the_harness.p_span()) );
+                    call the_harness.set_x_del_tile(
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) + 
+                                    (2*the_harness.p_span()) );
+                    call the_harness.set_y_del_tile( 
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) - 
+                                    (2*the_harness.p_span()) );
+                    call the_harness.set_x_next_tile(
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) + 
+                                    (2*the_harness.p_span()) );
+                    call the_harness.set_y_next_tile( 
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) - 
+                                    (3*the_harness.p_span()) );
+                    call the_harness.set_x_prev_tile(
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) + 
+                                    (1*the_harness.p_span()) );
+                    call the_harness.set_y_prev_tile( 
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) - 
+                                    (3*the_harness.p_span()) );
+                    call the_harness.set_x_save_tile(
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) + 
+                                    (1*the_harness.p_span()) );
+                    call the_harness.set_y_save_tile( 
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) - 
+                                    (1*the_harness.p_span()) );
+                    call the_harness.set_x_load_tile(
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) + 
+                                    (2*the_harness.p_span()) );
+                    call the_harness.set_y_load_tile( 
+                                    (3*the_harness.p_span()) + 
+                                    (the_harness.t_res()*the_harness.p_span()) - 
+                                    (1*the_harness.p_span()) );
                     call the_harness.ui_link( the_ui );
                     call the_harness.graphic_link( the_graphic );
                     call the_graphic.initialise( the_harness.t_res(), the_harness.p_span() );
+                    call the_harness.set_edit_tile_index( 0 );
+                    call the_harness.edit_tile_link( the_graphic.tiles()[0] );
                     call the_harness.palette_link( the_palette );
                     call the_palette.initialise();
 
@@ -85,50 +139,126 @@ object Harness
                     call self.ui().close_window();
                 };
 
-    proc        do_frame( frame_number : FrameCount ) 
+    proc   do_frame( frame_number : FrameCount ) 
+           {
+                                  "deal with timers"
+
+                                 "get mouse inputs"
+
+                  call set_mdown( false );
+                  if ui().mouse_button_is_down( 0 )
+                      => call set_mdown( true );
+
+                  if !mpressed() and ui().mouse_button_pressed( 0 )
+                      => call set_mpressed( true );
+
+                  call self.set_mpos( ui().get_mouse_position() );
+
+                                  "get key inputs"
+
+                  call self.set_sdown( ui().is_key_down( KEY_LEFT_SHIFT ) );
+
+                                  "call game logic"
+
+                  let tile_hit : Boolean = mdown_on_tile_grid();
+                  if mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
+                  if mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
+
+                  let palette_hit : Boolean = mdown_on_palette_grid();
+                  if mdown() and palette_hit => select_color_well_under_mouse();
+
+                  let add_button_hit : Boolean = mdown_on_add_button();
+                  if mpressed() and add_button_hit => self.graphic().add_tile();
+                  if mpressed() and add_button_hit
+                        => self.set_edit_tile_index( graphic().tiles()..size() - 1 );
+                  if mpressed() and add_button_hit 
+                        => self.edit_tile_link( graphic().tiles()[edit_tile_index()] );
+
+                  let prev_button_hit : Boolean = mdown_on_prev_button();
+                  if mpressed() and prev_button_hit and 0 < edit_tile_index()
+                        => self.set_edit_tile_index( edit_tile_index() - 1 );
+                  if mpressed() and prev_button_hit and 0 <= edit_tile_index()
+                        => self.edit_tile_link( graphic().tiles()[edit_tile_index()] );
+
+                  let next_button_hit : Boolean = mdown_on_next_button();
+                  if mpressed() and next_button_hit and edit_tile_index() < graphic().tiles()..size()-1
+                        => self.set_edit_tile_index( edit_tile_index() + 1 );
+                  if mpressed() and next_button_hit and edit_tile_index() < graphic().tiles()..size()
+                        => self.edit_tile_link( graphic().tiles()[edit_tile_index()] );
+
+                  if mpressed() => call set_mpressed( false );
+
+                  call EventQueue::defaultEQ().service_queue();
+
+                                      "render"
+
+                  call ui().begin_drawing();
+
+                      call ui().clear_background( WHITE );
+                      call ui().draw_texture( tex(), 300, 300, WHITE);
+                      call self.draw_edit_tile();
+                      call self.draw_graphic_grid();
+                      call self.draw_palette();
+                      call self.draw_prev_button();
+                      call self.draw_next_button();
+                      call self.draw_add_button();
+                      call self.draw_del_button();
+                      call self.draw_save_button();
+                      call self.draw_load_button();
+                      call self.draw_time();
+
+                  call ui().end_drawing();
+              };
+
+    proc        mdown_on_add_button() : Boolean
                 {
-                                    "deal with timers"
+                    let result : Boolean = false;
+                    let dx : Coord = 0;
+                    set dx = self.x_add_tile() + (self.p_span() * 1);
+                    let dy : Coord = 0;
+                    set dy = self.y_add_tile() + (self.p_span() * 1);
 
-                                   "get mouse inputs"
+                    if self.x_add_tile() < mpos()..x and mpos()..x < dx and
+                       self.y_add_tile() < mpos()..y and mpos()..y < dy
+                       =>
+                          set result = true;
+                    return result;
+                    
+                    call PixelGraphics::swa.println('mdown on add button');
+                };
 
-                    call set_mdown( false );
-                    if ui().mouse_button_is_down( 0 )
-                        => call set_mdown( true );
+    proc        mdown_on_prev_button() : Boolean
+                {
+                    let result : Boolean = false;
+                    let dx : Coord = 0;
+                    set dx = self.x_prev_tile() + (self.p_span() * 1);
+                    let dy : Coord = 0;
+                    set dy = self.y_prev_tile() + (self.p_span() * 1);
 
-                    call self.set_mpos( ui().get_mouse_position() );
+                    if self.x_prev_tile() < mpos()..x and mpos()..x < dx and
+                       self.y_prev_tile() < mpos()..y and mpos()..y < dy
+                       =>
+                          set result = true;
+                    return result;
+                    
+                    call PixelGraphics::swa.println('mdown on prev button');
+                };
 
-                                    "get key inputs"
+    proc        mdown_on_next_button() : Boolean
+                {
+                    let result : Boolean = false;
+                    let dx : Coord = 0;
+                    set dx = self.x_next_tile() + (self.p_span() * 1);
+                    let dy : Coord = 0;
+                    set dy = self.y_next_tile() + (self.p_span() * 1);
 
-                    call self.set_sdown( ui().is_key_down( KEY_LEFT_SHIFT ) );
-
-                                    "call game logic"
-
-                    let tile_hit : Boolean = mdown_on_tile_grid();
-                    if mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
-                    if mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
-
-                    let palette_hit : Boolean = mdown_on_palette_grid();
-                    if mdown() and palette_hit => select_color_well_under_mouse();
-
-                    call EventQueue::defaultEQ().service_queue();
-
-                                        "render"
-
-                    call ui().begin_drawing();
-
-                        call ui().clear_background( WHITE );
-                        call ui().draw_texture( tex(), 300, 300, WHITE);
-                        call self.draw_graphic();
-                        call self.draw_palette();
-                        call self.draw_prev_button();
-                        call self.draw_next_button();
-                        call self.draw_add_button();
-                        call self.draw_del_button();
-                        call self.draw_save_button();
-                        call self.draw_load_button();
-                        call self.draw_time();
-
-                    call ui().end_drawing();
+                    if self.x_next_tile() < mpos()..x and mpos()..x < dx and
+                       self.y_next_tile() < mpos()..y and mpos()..y < dy
+                       =>
+                          set result = true;
+                    return result;
+                    
+                    call PixelGraphics::swa.println('mdown on next button');
                 };
 
     proc        select_color_well_under_mouse()
@@ -182,7 +312,7 @@ object Harness
                     let  y : Coord = 0;
                     set  x = ((((Coord)self.mpos()..x) - self.x_tile()) / pixel_span);
                     set  y = ((((Coord)self.mpos()..y) - self.y_tile()) / pixel_span);
-                    foreach pix : self.graphic().tiles()[0].pixels()
+                    foreach pix : self.edit_tile().pixels()
                         | pix.x() = x and pix.y() = y
                         => call pix.set_color( self.bcolor() );
                 };
@@ -194,69 +324,63 @@ object Harness
                     let  y : Coord = 0;
                     set  x = ((((Coord)self.mpos()..x) - self.x_tile()) / pixel_span);
                     set  y = ((((Coord)self.mpos()..y) - self.y_tile()) / pixel_span);
-                    foreach pix : self.graphic().tiles()[0].pixels()
+                    foreach pix : self.edit_tile().pixels()
                         | pix.x() = x and pix.y() = y
                         => call pix.set_color( self.graphic().background_color() );
                 };
 
     proc        draw_next_button()
                 {
-                    let x : Coord = 0;
-                    set x = (3*p_span()) + (t_res()*p_span()) + (2*p_span());
-                    let y : Coord = 0;
-                    set y = (3*p_span()) + (t_res()*p_span()) - (3*p_span());
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
-                    call ui().draw_text( '>>', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                    call ui().draw_rectangle_lines( x_next_tile(), y_next_tile(),
+                                                    p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '>>', 
+                                          x_next_tile()+p_span()/5, y_next_tile()+2,
+                                          p_span(), DARKGRAY );
                 };
 
     proc        draw_prev_button()
                 {
-                    let x : Coord = 0;
-                    set x = (3*p_span()) + (t_res()*p_span()) + (1*p_span());
-                    let y : Coord = 0;
-                    set y = (3*p_span()) + (t_res()*p_span()) - (3*p_span());
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
-                    call ui().draw_text( '<<', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                    call ui().draw_rectangle_lines( x_prev_tile(), y_prev_tile(),
+                                                    p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '<<', 
+                                            x_prev_tile()+p_span()/5, y_prev_tile()+2, 
+                                            p_span(), DARKGRAY );
                 };
 
     proc        draw_add_button()
                 {
-                    let x : Coord = 0;
-                    set x = (3*p_span()) + (t_res()*p_span()) + (1*p_span());
-                    let y : Coord = 0;
-                    set y = (3*p_span()) + (t_res()*p_span()) - (2*p_span());
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
-                    call ui().draw_text( '+', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                    call ui().draw_rectangle_lines( x_add_tile(), y_add_tile(),
+                                                    p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '+',
+                                          x_add_tile()+p_span()/5, y_add_tile()+2,
+                                          p_span(), DARKGRAY );
                 };
 
     proc        draw_del_button()
                 {
-                    let x : Coord = 0;
-                    set x = (3*p_span()) + (t_res()*p_span()) + (2*p_span());
-                    let y : Coord = 0;
-                    set y = (3*p_span()) + (t_res()*p_span()) - (2*p_span());
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
-                    call ui().draw_text( '-', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                    call ui().draw_rectangle_lines( x_del_tile(), y_del_tile(),
+                                                    p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( '-', 
+                                            x_del_tile()+p_span()/5, y_del_tile()+2, 
+                                            p_span(), DARKGRAY );
                 };
 
     proc        draw_save_button()
                 {
-                    let x : Coord = 0;
-                    set x = (3*p_span()) + (t_res()*p_span()) + (1*p_span());
-                    let y : Coord = 0;
-                    set y = (3*p_span()) + (t_res()*p_span()) - (1*p_span());
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
-                    call ui().draw_text( 'S', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                    call ui().draw_rectangle_lines( x_save_tile(), y_save_tile(),
+                                                    p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( 'S', 
+                                                x_save_tile()+p_span()/5, y_save_tile()+2, 
+                                                p_span(), DARKGRAY );
                 };
 
     proc        draw_load_button()
                 {
-                    let x : Coord = 0;
-                    set x = (3*p_span()) + (t_res()*p_span()) + (2*p_span());
-                    let y : Coord = 0;
-                    set y = (3*p_span()) + (t_res()*p_span()) - (1*p_span());
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
-                    call ui().draw_text( 'L', x+p_span()/5, y+2, p_span(), DARKGRAY );
+                    call ui().draw_rectangle_lines( x_load_tile(), y_load_tile(),
+                                                    p_span(), p_span(), DARKGRAY );
+                    call ui().draw_text( 'L', 
+                                            x_load_tile()+p_span()/5, y_load_tile()+2,
+                                            p_span(), DARKGRAY );
                 };
 
     proc        draw_palette()
@@ -281,16 +405,17 @@ object Harness
                                               self.palette().color_wells()[n].color());
                 };
 
+"
     proc        draw_graphic()
                 {
                     foreach tile : self.graphic().tiles()
                         => call self.draw_tile( tile );
                     call self.draw_graphic_grid();
                 };
-
-    proc        draw_tile( tile : Tile )
+"
+    proc        draw_edit_tile( )
                 {
-                    foreach p : tile.pixels()
+                    foreach p : self.edit_tile().pixels()
                         => call self.draw_pixel( p );
                 };
 
