@@ -35,266 +35,270 @@ object Harness
     relation    uses_pixel      : Harness -> Pixel;
     relation    uses_color_well : Harness -> ColorWell;
 
-    proc        main() : ExitCode 
-                {
-                    let the_harness : Harness = new Harness;
-                    let the_ui      : Raylib  = new Raylib;
-                    let the_graphic : Graphic = new Graphic;
-                    let the_palette : Palette = new Palette;
+    proc main() : ExitCode 
+         {
+             let the_harness : Harness = new Harness;
+             let the_ui      : Raylib  = new Raylib;
+             let the_graphic : Graphic = new Graphic;
+             let the_palette : Palette = new Palette;
 
-                    call the_harness.initialise();
-                    call the_harness.ui_link( the_ui );
+             call the_harness.initialise();
+             call the_harness.ui_link( the_ui );
 
-                    call the_graphic.initialise( the_harness.t_res(), the_harness.p_span() );
-                    call the_harness.graphic_link( the_graphic );
-                    call the_harness.set_working_tile_index( 0 );
-                    call the_harness.working_tile_link( the_graphic.tiles()[0] );
+             call the_graphic.initialise( the_harness.t_res(), the_harness.p_span() );
+             call the_harness.graphic_link( the_graphic );
+             call the_harness.set_working_tile_index( 0 );
+             call the_harness.working_tile_link( the_graphic.tiles()[0] );
 
-                    call the_harness.palette_link( the_palette );
-                    call the_palette.initialise();
+             call the_harness.palette_link( the_palette );
+             call the_palette.initialise();
 
-                        call the_harness.start();
+                 call the_harness.start();
 
-                    call the_harness.ui_unlink();
+             call the_harness.ui_unlink();
 
-                    return ExitCode::Ok;
-                };
+             return ExitCode::Ok;
+         };
 
-    proc    initialise()
-            {
-                    call set_t_res( 24 );   "number of pixels in a tile side"
-                    call set_p_span( 32 );  "number of screen pixels in a tile pixel"
-                    call set_x_tile(      (3*p_span())                                     );
-                    call set_y_tile(      (3*p_span())                                     );
-                    call set_x_palette(   (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-                    call set_y_palette(   (3*p_span())                                     );
-                    call set_x_add_tile(  (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-                    call set_y_add_tile(  (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
-                    call set_x_del_tile(  (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
-                    call set_y_del_tile(  (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
-                    call set_x_next_tile( (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
-                    call set_y_next_tile( (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
-                    call set_x_prev_tile( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-                    call set_y_prev_tile( (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
-                    call set_x_save_tile( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-                    call set_y_save_tile( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
-                    call set_x_load_tile( (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
-                    call set_y_load_tile( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
-            };
+    proc initialise()
+         {
+             call set_t_res( 24 );   "number of pixels in a tile side"
+             call set_p_span( 32 );  "number of screen pixels in a tile pixel"
+             call set_x_tile(      (3*p_span())                                     );
+             call set_y_tile(      (3*p_span())                                     );
+             call set_x_palette(   (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_palette(   (3*p_span())                                     );
+             call set_x_add_tile(  (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_add_tile(  (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
+             call set_x_del_tile(  (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
+             call set_y_del_tile(  (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
+             call set_x_next_tile( (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
+             call set_y_next_tile( (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
+             call set_x_prev_tile( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_prev_tile( (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
+             call set_x_save_tile( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_save_tile( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
+             call set_x_load_tile( (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
+             call set_y_load_tile( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
+         };
 
-    proc        start()
-                {
-                    call ui().init_window( (3 * p_span()) + (t_res() * p_span()) + (7*p_span()),
-                                                (3 * p_span()) + (t_res() * p_span()) + (3*p_span()),
-                                                'PixelGraphics domain harness' );
-                    call ui().set_target_fps( 60 );
+    proc start()
+         {
+             call ui().init_window( (3 * p_span()) + (t_res() * p_span()) + (7*p_span()),
+                                         (3 * p_span()) + (t_res() * p_span()) + (3*p_span()),
+                                         'PixelGraphics domain harness' );
+             call ui().set_target_fps( 60 );
 
-                    "loop infinitely, until window closed"
-                        foreach i : FrameCount | 0 <= i and !ui().window_should_close()
-                            =>
-                                call do_frame( i );
+             "loop infinitely, until window closed"
+                 foreach i : FrameCount | 0 <= i and !ui().window_should_close()
+                     =>
+                         call do_frame( i );
 
-                    call ui().close_window();
-                };
+             call ui().close_window();
+         };
 
-    proc   do_frame( frame_number : FrameCount ) 
-           {
-                                  "deal with timers"
+    proc do_frame( frame_number : FrameCount ) 
+         {
+            "--------------------------------------------------"
+            call set_mdown( false );
+            if   ui().mouse_button_is_down( 0 ) 
+                  => call set_mdown( true );
+            if   !mpressed() and ui().mouse_button_pressed( 0 ) 
+                  => call set_mpressed( true );
+            call set_mpos( ui().get_mouse_position() );
 
-                                 "get mouse inputs"
+            "--------------------------------------------------"
+            call set_sdown( ui().is_key_down( KEY_LEFT_SHIFT ) );
 
-                  call set_mdown( false );
-                  if   ui().mouse_button_is_down( 0 ) 
-                        => call set_mdown( true );
-                  if   !mpressed() and ui().mouse_button_pressed( 0 ) 
-                        => call set_mpressed( true );
-                  call set_mpos( ui().get_mouse_position() );
+            "--------------------------------------------------"
+            let tile_hit : Boolean = mdown_in_grid( x_tile(), y_tile(), t_res(), t_res() );
+            if mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
+            if mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
 
-                                  "get key inputs"
+            "--------------------------------------------------"
+            let palette_hit : Boolean = mdown_in_grid( x_palette(), y_palette(), 3, 9);
+            if mdown() and palette_hit => select_color_well_under_mouse();
 
-                  call set_sdown( ui().is_key_down( KEY_LEFT_SHIFT ) );
+            "--------------------------------------------------"
+            let add_button_hit : Boolean = mdown_on_tile_at( x_add_tile(), y_add_tile() );
+            if mpressed() and add_button_hit => graphic().add_tile();
+            if mpressed() and add_button_hit => set_working_tile_index( graphic().tiles()..size() - 1 );
+            if mpressed() and add_button_hit => working_tile_link( graphic().tiles()[working_tile_index()] );
 
-                                  "call game logic"
+            "--------------------------------------------------"
+            let prev_button_hit : Boolean = mdown_on_tile_at( x_prev_tile(), y_prev_tile() );
+            if  mpressed() and prev_button_hit and 0  < working_tile_index() 
+              => 
+                  set_working_tile_index( working_tile_index() - 1 );
+            if  mpressed() and prev_button_hit and 0 <= working_tile_index() 
+              => 
+                  working_tile_link( graphic().tiles()[working_tile_index()] );
 
-                  let tile_hit : Boolean = mdown_in_grid( x_tile(), y_tile(), t_res(), t_res() );
-                  if mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
-                  if mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
+            "--------------------------------------------------"
+            let next_button_hit : Boolean = mdown_on_tile_at( x_next_tile(), y_next_tile() );
+            if  mpressed() and next_button_hit and working_tile_index() < graphic().tiles()..size()-1
+              => 
+                  set_working_tile_index( working_tile_index() + 1 );
+            if mpressed() and next_button_hit and working_tile_index() < graphic().tiles()..size()
+              => 
+                  working_tile_link( graphic().tiles()[working_tile_index()] );
 
-                  let palette_hit : Boolean = mdown_in_grid( x_palette(), y_palette(), 3, 9);
-                  if mdown() and palette_hit => select_color_well_under_mouse();
+            "--------------------------------------------------"
+            let save_button_hit : Boolean = mdown_on_tile_at( x_save_tile(), y_save_tile() );
+            if  mpressed() and save_button_hit => save_graphic();
 
-                  let add_button_hit : Boolean = mdown_on_tile_at( x_add_tile(), y_add_tile() );
-                  if mpressed() and add_button_hit => graphic().add_tile();
-                  if mpressed() and add_button_hit => set_working_tile_index( graphic().tiles()..size() - 1 );
-                  if mpressed() and add_button_hit => working_tile_link( graphic().tiles()[working_tile_index()] );
+            "--------------------------------------------------"
+            let load_button_hit : Boolean = mdown_on_tile_at( x_load_tile(), y_load_tile() );
+            if  mpressed() and load_button_hit => load_graphic();
 
-                  let prev_button_hit : Boolean = mdown_on_tile_at( x_prev_tile(), y_prev_tile() );
-                  if  mpressed() and prev_button_hit and 0  < working_tile_index() 
-                    => 
-                        set_working_tile_index( working_tile_index() - 1 );
-                  if  mpressed() and prev_button_hit and 0 <= working_tile_index() 
-                    => 
-                        working_tile_link( graphic().tiles()[working_tile_index()] );
+            "--------------------------------------------------"
+            if mpressed() => call set_mpressed( false ); 
+                  "mouse press handled, so clear it,
+                   otherwise we get activations a 60 fps"
 
-                  let next_button_hit : Boolean = mdown_on_tile_at( x_next_tile(), y_next_tile() );
-                  if  mpressed() and next_button_hit and working_tile_index() < graphic().tiles()..size()-1
-                    => 
-                        set_working_tile_index( working_tile_index() + 1 );
-                  if mpressed() and next_button_hit and working_tile_index() < graphic().tiles()..size()
-                    => 
-                        working_tile_link( graphic().tiles()[working_tile_index()] );
+            "--------------------------------------------------"
+            call EventQueue::defaultEQ().service_queue();
 
-                  let save_button_hit : Boolean = mdown_on_tile_at( x_save_tile(), y_save_tile() );
-                  if  mpressed() and save_button_hit => save_graphic();
+                                "render"
+            "--------------------------------------------------"
+            call ui().begin_drawing();
 
-                  let load_button_hit : Boolean = mdown_on_tile_at( x_load_tile(), y_load_tile() );
-                  if  mpressed() and load_button_hit => load_graphic();
+                call ui().clear_background( WHITE );
+                call draw_time();
+                call draw_working_tile();
+                call draw_palette();
+                call draw_button_at( '<<', x_prev_tile(), y_prev_tile() );
+                call draw_button_at( '>>', x_next_tile(), y_next_tile() );
+                call draw_button_at( '+',  x_add_tile(),  y_add_tile() );
+                call draw_button_at( '-',  x_del_tile(),  y_del_tile() );
+                call draw_button_at( 'S',  x_save_tile(), y_save_tile() );
+                call draw_button_at( 'L',  x_load_tile(), y_load_tile() );
 
-                  if mpressed() => call set_mpressed( false ); 
-                        "mouse press handled, so clear it,
-                         otherwise we get activations a 60 fps"
+            call ui().end_drawing();
+            "--------------------------------------------------"
+         };
 
-                  call EventQueue::defaultEQ().service_queue();
+    proc mdown_on_tile_at( x : Coord, y : Coord ) : Boolean
+         {
+             let result : Boolean = false;
+             let dx : Coord = 0;
+             set dx = x + p_span();
+             let dy : Coord = 0;
+             set dy = y + p_span();
 
-                                      "render"
+             if  x < mpos()..x and mpos()..x < dx and
+                 y < mpos()..y and mpos()..y < dy
+                =>
+                   set result = true;
+             return result;
+         };
 
-                  call ui().begin_drawing();
+    proc select_color_well_under_mouse()
+         {
+             let  x : Coord = 0;
+             let  y : Coord = 0;
+             set  x = (mpos()..x - x_palette()) / p_span();
+             set  y = (mpos()..y - y_palette()) / p_span();
+             call set_bcolor( palette().color_wells()[y*3 + x].color() );
+         };
 
-                      call ui().clear_background( WHITE );
-                      call draw_time();
-                      call draw_working_tile();
-                      call draw_palette();
-                      call draw_button_at( '<<', x_prev_tile(), y_prev_tile() );
-                      call draw_button_at( '>>', x_next_tile(), y_next_tile() );
-                      call draw_button_at( '+',  x_add_tile(),  y_add_tile() );
-                      call draw_button_at( '-',  x_del_tile(),  y_del_tile() );
-                      call draw_button_at( 'S',  x_save_tile(), y_save_tile() );
-                      call draw_button_at( 'L',  x_load_tile(), y_load_tile() );
+    proc mdown_in_grid( x1 : Coord, y1 : Coord, dx : Coord, dy : Coord ) : Boolean
+         {
+             let result : Boolean = false;
+             let x2 : Coord = 0;
+             set x2 = x1 + (p_span() * dx);
+             let y2 : Coord = 0;
+             set y2 = y1 + (p_span() * dy);
 
-                  call ui().end_drawing();
-              };
+             if x1 < mpos()..x and mpos()..x < x2 and
+                y1 < mpos()..y and mpos()..y < y2
+                =>
+                   set result = true;
+             return result;
+         };
 
-    proc        mdown_on_tile_at( x : Coord, y : Coord ) : Boolean
-                {
-                    let result : Boolean = false;
-                    let dx : Coord = 0;
-                    set dx = x + p_span();
-                    let dy : Coord = 0;
-                    set dy = y + p_span();
+    proc paint_pixel_under_mouse()
+         {
+             let pixel_span : Coord = graphic().grid_span();
+             let  x : Coord = 0;
+             let  y : Coord = 0;
+             set  x = (mpos()..x - x_tile()) / pixel_span;
+             set  y = (mpos()..y - y_tile()) / pixel_span;
+             foreach pix : working_tile().pixels()
+                 | pix.x() = x and pix.y() = y
+                 => call pix.set_color( bcolor() );
+         };
 
-                    if  x < mpos()..x and mpos()..x < dx and
-                        y < mpos()..y and mpos()..y < dy
-                       =>
-                          set result = true;
-                    return result;
-                };
+    proc erase_pixel_under_mouse()
+         {
+             let pixel_span : Coord = graphic().grid_span();
+             let  x : Coord = 0;
+             let  y : Coord = 0;
+             set  x = (mpos()..x - x_tile()) / pixel_span;
+             set  y = (mpos()..y - y_tile()) / pixel_span;
+             foreach pix : working_tile().pixels()
+                 | pix.x() = x and pix.y() = y
+                 => call pix.set_color( graphic().background_color() );
+         };
 
-    proc        select_color_well_under_mouse()
-                {
-                    let  x : Coord = 0;
-                    let  y : Coord = 0;
-                    set  x = (mpos()..x - x_palette()) / p_span();
-                    set  y = (mpos()..y - y_palette()) / p_span();
-                    call set_bcolor( palette().color_wells()[y*3 + x].color() );
-                };
+    proc draw_button_at( label : Label, x : Coord, y : Coord )
+         {
+             call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
+             call ui().draw_text( label, x+p_span()/5, y+2, p_span(), DARKGRAY );
+         };
 
-    proc        mdown_in_grid( x1 : Coord, y1 : Coord, dx : Coord, dy : Coord ) : Boolean
-                {
-                    let result : Boolean = false;
-                    let x2 : Coord = 0;
-                    set x2 = x1 + (p_span() * dx);
-                    let y2 : Coord = 0;
-                    set y2 = y1 + (p_span() * dy);
+    proc draw_palette()
+         {
+             foreach n : Coord | 0 <= n and n < palette().color_wells()..size()
+                 => call draw_color_well( n );
+             );
+         };
 
-                    if x1 < mpos()..x and mpos()..x < x2 and
-                       y1 < mpos()..y and mpos()..y < y2
-                       =>
-                          set result = true;
-                    return result;
-                };
+    proc draw_color_well( n : Coord )
+         {
+             let x_well : Coord = 0;
+             let y_well : Coord = 0;
 
-    proc        paint_pixel_under_mouse()
-                {
-                    let pixel_span : Coord = graphic().grid_span();
-                    let  x : Coord = 0;
-                    let  y : Coord = 0;
-                    set  x = (mpos()..x - x_tile()) / pixel_span;
-                    set  y = (mpos()..y - y_tile()) / pixel_span;
-                    foreach pix : working_tile().pixels()
-                        | pix.x() = x and pix.y() = y
-                        => call pix.set_color( bcolor() );
-                };
+             set x_well = x_palette() + (p_span() * (n%3));
+             set y_well = y_palette() + (p_span() * (n/3));
+             call ui().draw_rectangle      ( x_well, y_well, p_span(), p_span(), palette().color_wells()[n].color());
+             call ui().draw_rectangle_lines( x_well, y_well, p_span(), p_span(), DARKGRAY);
+         };
 
-    proc        erase_pixel_under_mouse()
-                {
-                    let pixel_span : Coord = graphic().grid_span();
-                    let  x : Coord = 0;
-                    let  y : Coord = 0;
-                    set  x = (mpos()..x - x_tile()) / pixel_span;
-                    set  y = (mpos()..y - y_tile()) / pixel_span;
-                    foreach pix : working_tile().pixels()
-                        | pix.x() = x and pix.y() = y
-                        => call pix.set_color( graphic().background_color() );
-                };
+    proc draw_working_tile( )
+         {
+             foreach p : working_tile().pixels()
+                 => call draw_pixel( p );
+         };
 
-    proc        draw_button_at( label : Label, x : Coord, y : Coord )
-                {
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), DARKGRAY );
-                    call ui().draw_text( label, x+p_span()/5, y+2, p_span(), DARKGRAY );
-                };
+    proc draw_pixel( p : Pixel )
+         {
+             let x : Coord = 0;
+             set x = x_tile() + (p_span() * p.x());
+             let y : Coord = 0;
+             set y = y_tile() + (p_span() * p.y());
+             call ui().draw_rectangle      ( x, y, p_span(), p_span(), p.color());
+             call ui().draw_rectangle_lines( x, y, p_span(), p_span(), LIGHTGRAY);
+         };
 
-    proc        draw_palette()
-                {
-                    foreach n : Coord | 0 <= n and n < palette().color_wells()..size()
-                        => call draw_color_well( n );
-                    );
-                };
+    proc draw_mouse_coords() {
+             call ui().draw_text( mpos()..x, 20, 50, p_span(), BLACK );
+             call ui().draw_text( mpos()..y, 20, 80, p_span(), BLACK );
+         };
 
-    proc        draw_color_well( n : Coord )
-                {
-                    let x_well : Coord = 0;
-                    let y_well : Coord = 0;
+    proc draw_time()
+         {
+             let  screen_width : Coord = ui().get_screen_width();
+             call ui().draw_text( ui().time_HHMMSS(), (screen_width/2) - 80, 20, p_span(), PINK );
+         };
 
-                    set x_well = x_palette() + (p_span() * (n%3));
-                    set y_well = y_palette() + (p_span() * (n/3));
-                    call ui().draw_rectangle      ( x_well, y_well, p_span(), p_span(), palette().color_wells()[n].color());
-                    call ui().draw_rectangle_lines( x_well, y_well, p_span(), p_span(), DARKGRAY);
-                };
+    proc save_graphic()
+         {
+             call PixelGraphics::swa.println('save file!');
+         };
 
-    proc        draw_working_tile( )
-                {
-                    foreach p : working_tile().pixels()
-                        => call draw_pixel( p );
-                };
-
-    proc        draw_pixel( p : Pixel )
-                {
-                    let x : Coord = 0;
-                    set x = x_tile() + (p_span() * p.x());
-                    let y : Coord = 0;
-                    set y = y_tile() + (p_span() * p.y());
-                    call ui().draw_rectangle      ( x, y, p_span(), p_span(), p.color());
-                    call ui().draw_rectangle_lines( x, y, p_span(), p_span(), LIGHTGRAY);
-                };
-
-    proc        draw_mouse_coords() {
-                    call ui().draw_text( mpos()..x, 20, 50, p_span(), BLACK );
-                    call ui().draw_text( mpos()..y, 20, 80, p_span(), BLACK );
-                };
-
-    proc        draw_time()
-                {
-                    let  screen_width : Coord = ui().get_screen_width();
-                    call ui().draw_text( ui().time_HHMMSS(), (screen_width/2) - 80, 20, p_span(), PINK );
-                };
-
-    proc        save_graphic()
-                {
-                    call PixelGraphics::swa.println('save file!');
-                };
-
-    proc        load_graphic()
-                {
-                    call PixelGraphics::swa.println('load file!');
-                };
+    proc load_graphic()
+         {
+             call PixelGraphics::swa.println('load file!');
+         };
 };
