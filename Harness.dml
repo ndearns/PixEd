@@ -9,8 +9,10 @@ object Harness
     attr        bcolor             : Color;
     attr        t_res              : Coord;  "number of tile pixels in Tile side"
     attr        p_span             : Coord;  "number of screen pixels in Pixel or ColorWell"
-    attr        x_tile             : Coord;
-    attr        y_tile             : Coord;
+    attr        x_tile_view        : Coord;
+    attr        y_tile_view        : Coord;
+    attr        x_mini_view        : Coord;
+    attr        y_mini_view        : Coord;
     attr        x_palette          : Coord;
     attr        y_palette          : Coord;
     attr        x_save_tile        : Coord;
@@ -62,10 +64,12 @@ object Harness
 
     proc initialise()
          {
-             call set_t_res( 24 );   "number of pixels in a tile side"
-             call set_p_span( 32 );  "number of screen pixels in a tile pixel"
-             call set_x_tile(      (3*p_span())                                     );
-             call set_y_tile(      (3*p_span())                                     );
+             call set_t_res( 32 );   "number of pixels in a tile side"
+             call set_p_span( 24 );  "number of screen pixels in a tile pixel"
+             call set_x_tile_view( (3*p_span())                                     );
+             call set_y_tile_view( (3*p_span())                                     );
+             call set_x_mini_view( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_mini_view( (3*p_span()) + (9      *p_span()) + (1*p_span()) );
              call set_x_palette(   (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
              call set_y_palette(   (3*p_span())                                     );
              call set_x_add_tile(  (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
@@ -111,7 +115,7 @@ object Harness
             call set_sdown( ui().is_key_down( KEY_LEFT_SHIFT ) );
 
             "--------------------------------------------------"
-            let tile_hit : Boolean = mdown_in_grid( x_tile(), y_tile(), t_res(), t_res() );
+            let tile_hit : Boolean = mdown_in_grid( x_tile_view(), y_tile_view(), t_res(), t_res() );
             if mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
             if mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
 
@@ -145,7 +149,7 @@ object Harness
 
             "--------------------------------------------------"
             let save_button_hit : Boolean = mdown_on_tile_at( x_save_tile(), y_save_tile() );
-            if  mpressed() and save_button_hit => save_graphic();
+            if  mpressed() and save_button_hit => save_tile();
 
             "--------------------------------------------------"
             let load_button_hit : Boolean = mdown_on_tile_at( x_load_tile(), y_load_tile() );
@@ -167,6 +171,7 @@ object Harness
                 call draw_time();
                 call draw_working_tile();
                 call draw_palette();
+                call draw_mini_view();
                 call draw_button_at( '<<', x_prev_tile(), y_prev_tile() );
                 call draw_button_at( '>>', x_next_tile(), y_next_tile() );
                 call draw_button_at( '+',  x_add_tile(),  y_add_tile() );
@@ -222,8 +227,8 @@ object Harness
              let pixel_span : Coord = graphic().grid_span();
              let  x : Coord = 0;
              let  y : Coord = 0;
-             set  x = (mpos()..x - x_tile()) / pixel_span;
-             set  y = (mpos()..y - y_tile()) / pixel_span;
+             set  x = (mpos()..x - x_tile_view()) / pixel_span;
+             set  y = (mpos()..y - y_tile_view()) / pixel_span;
              foreach pix : working_tile().pixels()
                  | pix.x() = x and pix.y() = y
                  => call pix.set_color( bcolor() );
@@ -234,8 +239,8 @@ object Harness
              let pixel_span : Coord = graphic().grid_span();
              let  x : Coord = 0;
              let  y : Coord = 0;
-             set  x = (mpos()..x - x_tile()) / pixel_span;
-             set  y = (mpos()..y - y_tile()) / pixel_span;
+             set  x = (mpos()..x - x_tile_view()) / pixel_span;
+             set  y = (mpos()..y - y_tile_view()) / pixel_span;
              foreach pix : working_tile().pixels()
                  | pix.x() = x and pix.y() = y
                  => call pix.set_color( graphic().background_color() );
@@ -274,11 +279,26 @@ object Harness
     proc draw_pixel( p : Pixel )
          {
              let x : Coord = 0;
-             set x = x_tile() + (p_span() * p.x());
+             set x = x_tile_view() + (p_span() * p.x());
              let y : Coord = 0;
-             set y = y_tile() + (p_span() * p.y());
+             set y = y_tile_view() + (p_span() * p.y());
              call ui().draw_rectangle      ( x, y, p_span(), p_span(), p.color());
              call ui().draw_rectangle_lines( x, y, p_span(), p_span(), LIGHTGRAY);
+         };
+
+    proc draw_mini_view( )
+         {
+             foreach p : working_tile().pixels()
+                 => call draw_mini_pixel( p );
+         };
+
+    proc draw_mini_pixel( p : Pixel )
+         {
+             let x : Coord = 0;
+             set x = x_mini_view() + (2*p.x());
+             let y : Coord = 0;
+             set y = y_mini_view() + (2*p.y());
+             call ui().draw_rectangle( x, y, 2, 2, p.color() );
          };
 
     proc draw_mouse_coords() {
@@ -292,9 +312,16 @@ object Harness
              call ui().draw_text( ui().time_HHMMSS(), (screen_width/2) - 80, 20, p_span(), PINK );
          };
 
-    proc save_graphic()
+    proc save_tile()
          {
-             call PixelGraphics::swa.println('save file!');
+             call PixelGraphics::swa.println('saving file!');
+             call ui().begin_drawing();
+             let img : Image = ui().gen_image_color( t_res(), t_res(), bcolor() );
+             foreach p : working_tile().pixels()
+                 => call ui().image_draw_pixel( &img, p.x(), p.y(), p.color() );
+             call ui().end_drawing();
+             call ui().export_image( img, 'pixed_out.png' );
+             call ui().unload_image( img );
          };
 
     proc load_graphic()
