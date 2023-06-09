@@ -4,8 +4,14 @@ Pixel Art Editor
 
 A dml tile editor that's really, really, simple, unlike all the pixel art editors I've looked at so far.
 
-[Screenshot](./PixEd_screenshot.png "Screenshot in use")
+![Screenshot](./PixEd_screenshot.png)
 
+- When you hit 'S' the current tile is exported to a 'pixed_out.png' file.  Rename it to stop it being overwritten.
+- When you hit '+' a new tile is added at the end of the tiles sequence.
+- When you hit '<<' or '>>' you go back and forth thru the tiles
+- There is no save for the tile set
+- The 32x32 tile size is hard coded in.  Change and recompile to draw 16x16, etc.
+- Repeat after me: simple, simple, simple, simple, simple...
 
 - [x] Tiles are 16x16.  
 - [x] A new Graphic starts with one Tile 
