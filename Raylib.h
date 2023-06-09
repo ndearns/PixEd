@@ -13,6 +13,10 @@ class Raylib;
 
 class Raylib {
     public:
+    void set_trace_log_level(int log_level)
+        {SetTraceLogLevel(log_level);};
+    void turn_logging_off()
+        {SetTraceLogLevel(LOG_NONE);};
     void init_window(int width=800, int height=450, const std::string &title="raylib")
         { InitWindow(width, height, title.data());};
     void close_window() 

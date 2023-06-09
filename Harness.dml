@@ -15,6 +15,8 @@ object Harness
     attr        y_mini_view        : Coord;
     attr        x_palette          : Coord;
     attr        y_palette          : Coord;
+    attr        x_save_graphic     : Coord;
+    attr        y_save_graphic     : Coord;
     attr        x_save_tile        : Coord;
     attr        y_save_tile        : Coord;
     attr        x_load_tile        : Coord;
@@ -44,6 +46,8 @@ object Harness
              let the_graphic : Graphic = new Graphic;
              let the_palette : Palette = new Palette;
 
+             call the_ui.turn_logging_off();
+
              call the_harness.initialise();
              call the_harness.ui_link( the_ui );
 
@@ -66,24 +70,26 @@ object Harness
          {
              call set_t_res( 32 );   "number of pixels in a tile side"
              call set_p_span( 24 );  "number of screen pixels in a tile pixel"
-             call set_x_tile_view( (3*p_span())                                     );
-             call set_y_tile_view( (3*p_span())                                     );
-             call set_x_mini_view( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-             call set_y_mini_view( (3*p_span()) + (9      *p_span()) + (1*p_span()) );
-             call set_x_palette(   (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-             call set_y_palette(   (3*p_span())                                     );
-             call set_x_add_tile(  (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-             call set_y_add_tile(  (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
-             call set_x_del_tile(  (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
-             call set_y_del_tile(  (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
-             call set_x_next_tile( (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
-             call set_y_next_tile( (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
-             call set_x_prev_tile( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-             call set_y_prev_tile( (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
-             call set_x_save_tile( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
-             call set_y_save_tile( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
-             call set_x_load_tile( (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
-             call set_y_load_tile( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
+             call set_x_tile_view(    (3*p_span())                                     );
+             call set_y_tile_view(    (3*p_span())                                     );
+             call set_x_mini_view(    (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_mini_view(    (3*p_span()) + (9      *p_span()) + (1*p_span()) );
+             call set_x_palette(      (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_palette(      (3*p_span())                                     );
+             call set_x_add_tile(     (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_add_tile(     (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
+             call set_x_del_tile(     (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
+             call set_y_del_tile(     (3*p_span()) + (t_res()*p_span()) - (2*p_span()) );
+             call set_x_next_tile(    (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
+             call set_y_next_tile(    (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
+             call set_x_prev_tile(    (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_prev_tile(    (3*p_span()) + (t_res()*p_span()) - (3*p_span()) );
+             call set_x_save_graphic( (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
+             call set_y_save_graphic( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
+             call set_x_save_tile(    (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
+             call set_y_save_tile(    (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
+             call set_x_load_tile(    (3*p_span()) + (t_res()*p_span()) + (3*p_span()) );
+             call set_y_load_tile(    (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
          };
 
     proc start()
@@ -91,7 +97,7 @@ object Harness
              call ui().init_window( (3 * p_span()) + (t_res() * p_span()) + (7*p_span()),
                                          (3 * p_span()) + (t_res() * p_span()) + (3*p_span()),
                                          'PixelGraphics domain harness' );
-             call ui().set_target_fps( 60 );
+             call ui().set_target_fps( 90 );
 
              "loop infinitely, until window closed"
                  foreach i : FrameCount | 0 <= i and !ui().window_should_close()
@@ -116,8 +122,8 @@ object Harness
 
             "--------------------------------------------------"
             let tile_hit : Boolean = mdown_in_grid( x_tile_view(), y_tile_view(), t_res(), t_res() );
-            if mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
-            if mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
+            if  mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
+            if  mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
 
             "--------------------------------------------------"
             let palette_hit : Boolean = mdown_in_grid( x_palette(), y_palette(), 3, 9);
@@ -148,8 +154,12 @@ object Harness
                   working_tile_link( graphic().tiles()[working_tile_index()] );
 
             "--------------------------------------------------"
-            let save_button_hit : Boolean = mdown_on_tile_at( x_save_tile(), y_save_tile() );
-            if  mpressed() and save_button_hit => save_tile();
+            let save_graphic_hit : Boolean = mdown_on_tile_at( x_save_graphic(), y_save_graphic() );
+            if  mpressed() and save_graphic_hit => save_graphic();
+
+            "--------------------------------------------------"
+            let save_tile_hit : Boolean = mdown_on_tile_at( x_save_tile(), y_save_tile() );
+            if  mpressed() and save_tile_hit => save_tile();
 
             "--------------------------------------------------"
             let load_button_hit : Boolean = mdown_on_tile_at( x_load_tile(), y_load_tile() );
@@ -161,7 +171,7 @@ object Harness
                    otherwise we get activations a 60 fps"
 
             "--------------------------------------------------"
-            call EventQueue::defaultEQ().service_queue();
+            "call EventQueue::defaultEQ().service_queue();"
 
                                 "render"
             "--------------------------------------------------"
@@ -176,7 +186,8 @@ object Harness
                 call draw_button_at( '>>', x_next_tile(), y_next_tile() );
                 call draw_button_at( '+',  x_add_tile(),  y_add_tile() );
                 call draw_button_at( '-',  x_del_tile(),  y_del_tile() );
-                call draw_button_at( 'S',  x_save_tile(), y_save_tile() );
+                call draw_button_at( 'G',  x_save_graphic(), y_save_graphic() );
+                call draw_button_at( 'T',  x_save_tile(), y_save_tile() );
                 call draw_button_at( 'L',  x_load_tile(), y_load_tile() );
 
             call ui().end_drawing();
@@ -312,9 +323,29 @@ object Harness
              call ui().draw_text( ui().time_HHMMSS(), (screen_width/2) - 80, 20, p_span(), PINK );
          };
 
+    proc save_graphic()
+         {
+             call PixelGraphics::swa.println('saving graphic!');
+             let tile_count : Coord = 0;
+             set tile_count = graphic().tiles()..size();
+             call ui().begin_drawing();
+             let img : Image = ui().gen_image_color( t_res()*tile_count, t_res(), bcolor() );
+             foreach n : Coord | 0 <= n and n < tile_count
+                 => call save_tile_in_graphic( img, n );
+             call ui().end_drawing();
+             call ui().export_image( img );
+             call ui().unload_image( img );
+         };
+
+    proc save_tile_in_graphic( img : Image, n : Coord )
+         {
+             foreach p : graphic().tiles()[n].pixels()
+                => call ui().image_draw_pixel( &img, t_res()*n + p.x(), p.y(), p.color() );
+         };
+
     proc save_tile()
          {
-             call PixelGraphics::swa.println('saving file!');
+             call PixelGraphics::swa.println('saving tile!');
              call ui().begin_drawing();
              let img : Image = ui().gen_image_color( t_res(), t_res(), bcolor() );
              foreach p : working_tile().pixels()

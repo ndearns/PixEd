@@ -1,5 +1,5 @@
 CC = g++
-CCFLAGS = -std=c++2a -g -Wall
+CCFLAGS = -std=c++2a -g -Wall -Ofast
 GEN_MODE = async
 DML_DOM = PixelGraphics
 DML_OBJS= Harness Graphic Tile Pixel Palette ColorWell
