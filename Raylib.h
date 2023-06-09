@@ -96,8 +96,16 @@ class Raylib {
     Image gen_image_color( int width, int height, Color color ) {
         return GenImageColor( width, height, color );
     };
-    void export_image( Image img, const char* filename ) {
-        ExportImage( img, filename );
+    void export_image( Image img ) {
+        static char buffer[256];
+        time_t raw_time;
+        struct tm* time_info;
+
+        time(&raw_time);
+        time_info = localtime (&raw_time);
+
+        strftime(buffer, 256, "PixEd_%H%M%S.png", time_info);
+        ExportImage( img, buffer );
     };
     void unload_image( Image img ) {
         UnloadImage( img );

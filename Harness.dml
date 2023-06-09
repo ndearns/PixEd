@@ -320,7 +320,7 @@ object Harness
              foreach p : working_tile().pixels()
                  => call ui().image_draw_pixel( &img, p.x(), p.y(), p.color() );
              call ui().end_drawing();
-             call ui().export_image( img, 'pixed_out.png' );
+             call ui().export_image( img );
              call ui().unload_image( img );
          };
 
