@@ -13,6 +13,8 @@ class Raylib;
 
 class Raylib {
     public:
+    bool cmatch( Color c1, Color c2 ) 
+        { if (c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a) return true; return false; };
     void set_trace_log_level(int log_level)
         {SetTraceLogLevel(log_level);};
     void turn_logging_off()

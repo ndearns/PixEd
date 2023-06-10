@@ -6,6 +6,7 @@ object Harness
     attr        mdown              : Boolean;
     attr        mpressed           : Boolean;
     attr        sdown              : Boolean;
+    attr        fdown              : Boolean;
     attr        bcolor             : Color;
     attr        t_res              : Coord;  "number of tile pixels in Tile side"
     attr        p_span             : Coord;  "number of screen pixels in Pixel or ColorWell"
@@ -131,11 +132,13 @@ object Harness
 
             "--------------------------------------------------"
             call set_sdown( ui().is_key_down( KEY_LEFT_SHIFT ) );
+            call set_fdown( ui().is_key_down( KEY_F ) );
 
             "--------------------------------------------------"
             let tile_hit : Boolean = mdown_in_grid( x_tile_view(), y_tile_view(), t_res(), t_res() );
-            if  mdown() and tile_hit and !sdown() => paint_pixel_under_mouse();
-            if  mdown() and tile_hit and  sdown() => erase_pixel_under_mouse();
+            if  mdown() and tile_hit and !sdown() and !fdown() => paint_pixel_under_mouse();
+            if  mdown() and tile_hit and  sdown() and !fdown() => erase_pixel_under_mouse();
+            if  mpressed() and tile_hit and !sdown() and  fdown() => flood_pixel_under_mouse();
 
             "--------------------------------------------------"
             let palette_hit : Boolean = mdown_in_grid( x_palette(), y_palette(), 3, 9);
@@ -204,6 +207,45 @@ object Harness
 
             call ui().end_drawing();
             "--------------------------------------------------"
+         };
+
+    proc pixel_under_mouse() : Pixel
+        {
+             let pixel_span : Coord = graphic().grid_span();
+             let  x : Coord = 0;
+             let  y : Coord = 0;
+             set  x = (mpos()..x - x_tile_view()) / pixel_span;
+             set  y = (mpos()..y - y_tile_view()) / pixel_span;
+             foreach pix : working_tile().pixels()
+                 | pix.x() = x and pix.y() = y
+                 => return pix;
+             return nullptr;
+        };
+
+    proc pixel_at( x : Coord, y : Coord ) : Pixel
+         {
+            return working_tile().pixels()[ y * t_res() + x ];
+         };
+
+    proc flood_pixel_under_mouse()
+         {
+            if ! ui().cmatch( pixel_under_mouse().color(), bcolor() )
+            => call replace_color( pixel_under_mouse(), pixel_under_mouse().color() );
+         };
+
+    proc replace_color( p : Pixel, rc : Color )
+         {
+            pre ui().cmatch(p.color(), rc);
+            call p.set_color( bcolor() );
+
+            if   0 < p.x() and ui().cmatch(pixel_at(p.x()-1,p.y()).color() , rc)
+                => call replace_color( pixel_at(p.x()-1,p.y()), rc );
+            if   p.x() < t_res()-1 and ui().cmatch(pixel_at(p.x()+1,p.y()).color() , rc)
+                => call replace_color( pixel_at(p.x()+1,p.y()), rc );
+            if   0 < p.y() and ui().cmatch(pixel_at(p.x(),p.y()-1).color() , rc)
+                => call replace_color( pixel_at(p.x(),p.y()-1), rc );
+            if   p.y() < t_res()-1 and ui().cmatch(pixel_at(p.x(),p.y()+1).color() , rc)
+                => call replace_color( pixel_at(p.x(),p.y()+1), rc );
          };
 
     proc mdown_on_tile_at( x : Coord, y : Coord ) : Boolean

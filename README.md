@@ -16,18 +16,18 @@ PixEd's harness uses raylib.  The app has been cloned from this repo and compile
 - Set up: `ln -s .../PixEd/run /usr/bin/PixEd`
 - Running `PixEd` for default 32x32 tile with 24x24 pixels
 - Run `PixEd <t_res> <p_span>` to set tile resolution and pixel span.
-E.g. `PixEd 16 24`
+E.g. `PixEd 16 24` specifies  a 16x16 tile with 24x24 screen pixels in the tile pixels.
 - Caution: if tile resolution is less than 16 then UI gets messy
 - Clicking on a color in the palette sets the brush color
 - Painting in the tile area sets the pixel colors
 - Shift-painting in the tile area sets pixels to the background color, i.e. that's your erase function.
+- Holding 'f' down and clicking Floods matching pixels with the brush color.  That's an easy way to make the background a specific color.
 - The top-right color in the palette is '100% transparency'.
 - Change the default background color in Harness.dml
-- When you hit 'S' the current **tile** is exported to a 'PixEd_HHMMSS.png' file, where HHMMSS is the time.  Rename it to stop it being overwritten.
+- When you hit 'G' the current **graphic** is exported to a 'PixEd_HHMMSS.png' file, where HHMMSS is the time.  Rename it to stop it being overwritten.
+- When you hit 'T' the current **tile** is exported to a 'PixEd_HHMMSS.png' file, where HHMMSS is the time.  Rename it to stop it being overwritten.
 - When you hit '+' a new tile is appended to the tiles sequence.
 - When you hit '<<' or '>>' you go back and forth thru the tiles
-- There is no save for the tile set as a whole
-- The 32x32 tile size is hard coded in.  Change and recompile to draw 16x16, etc.
 - The 'L' and '-' buttons do nothing, atm.
 - Repeat after me: simple, simple, simple, simple, simple...
 - If you upsize the tile resolution (t_res) to 64x64, you may have trouble fitting it on screen; downsize the pixels (p_span) to get the bigger tiles to fit on screen.
