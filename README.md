@@ -13,6 +13,11 @@ PixEd's harness uses raylib.  The app has been cloned from this repo and compile
 
 ---
 
+- Set up: `ln -s .../PixEd/run /usr/bin/PixEd`
+- Running `PixEd` for default 32x32 tile with 24x24 pixels
+- Run `PixEd <t_res> <p_span>` to set tile resolution and pixel span.
+E.g. `PixEd 16 24`
+- Caution: if tile resolution is less than 16 then UI gets messy
 - Clicking on a color in the palette sets the brush color
 - Painting in the tile area sets the pixel colors
 - Shift-painting in the tile area sets pixels to the background color, i.e. that's your erase function.
