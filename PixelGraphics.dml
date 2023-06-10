@@ -22,5 +22,7 @@ domain PixelGraphics
     type        Coord       : NumericType [ cpp_type='uint16_t'; ];
     type        Size        : NumericType [ cpp_type='uint16_t'; ];
     type        Label       : NumericType [ cpp_type='std::string'; ];
+    type        ArgCount    : NumericType [ cpp_type='int'; ];
+    type        ArgStrings  : TextType    [ cpp_type='char**'; ];
     type        Boolean     : ProvidedType;
 };

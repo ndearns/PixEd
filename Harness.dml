@@ -39,12 +39,26 @@ object Harness
     relation    uses_pixel      : Harness -> Pixel;
     relation    uses_color_well : Harness -> ColorWell;
 
-    proc main() : ExitCode 
+    proc main( arg_count : ArgCount, arg_strings : ArgStrings) : ExitCode 
          {
              let the_harness : Harness = new Harness;
              let the_ui      : Raylib  = new Raylib;
              let the_graphic : Graphic = new Graphic;
              let the_palette : Palette = new Palette;
+
+             call the_harness.set_t_res( 32 );   "number of pixels in a tile side"
+             call the_harness.set_p_span( 24 );  "number of screen pixels in a tile pixel"
+
+             if   arg_count > 1 
+                  => call the_harness.set_t_res( std::atoi( arg_strings[1] ) );
+             if   arg_count > 2 
+                  => call the_harness.set_p_span( std::atoi( arg_strings[2] ) );
+
+             call PixelGraphics::swa.print(arg_strings[0]);
+             call PixelGraphics::swa.print(' tile resolution: ');
+             call PixelGraphics::swa.print( std::to_string(the_harness.t_res()) );
+             call PixelGraphics::swa.print(' pixel resolution: ');
+             call PixelGraphics::swa.println( std::to_string(the_harness.p_span()) );
 
              call the_ui.turn_logging_off();
 
@@ -68,8 +82,6 @@ object Harness
 
     proc initialise()
          {
-             call set_t_res( 32 );   "number of pixels in a tile side"
-             call set_p_span( 24 );  "number of screen pixels in a tile pixel"
              call set_x_tile_view(    (3*p_span())                                     );
              call set_y_tile_view(    (3*p_span())                                     );
              call set_x_mini_view(    (3*p_span()) + (t_res()*p_span()) + (1*p_span()) );
