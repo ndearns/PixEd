@@ -18,6 +18,12 @@ gen: *.dml
 %.o: %.cpp %.h
 	$(CC) $(CCFLAGS) -c $< -o $@
 
+.PHONY: tidy
+tidy:
+	rm -f *.o $(DML_DOM).h
+	for obj in $(DML_OBJS); do \
+		rm -f $$obj.cpp $$obj.h; \
+	done
 .PHONY: clean
 clean:
 	rm -f *.o ./run $(DML_DOM).h
