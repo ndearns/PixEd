@@ -200,10 +200,10 @@ object Harness
                 call draw_button_at( '<<', x_prev_tile(), y_prev_tile() );
                 call draw_button_at( '>>', x_next_tile(), y_next_tile() );
                 call draw_button_at( '+',  x_add_tile(),  y_add_tile() );
-                call draw_button_at( '-',  x_del_tile(),  y_del_tile() );
+               "call draw_button_at( '-',  x_del_tile(),  y_del_tile() );"
                 call draw_button_at( 'G',  x_save_graphic(), y_save_graphic() );
                 call draw_button_at( 'T',  x_save_tile(), y_save_tile() );
-                call draw_button_at( 'L',  x_load_tile(), y_load_tile() );
+               "call draw_button_at( 'L',  x_load_tile(), y_load_tile() );"
 
             call ui().end_drawing();
             "--------------------------------------------------"
@@ -379,7 +379,7 @@ object Harness
 
     proc save_graphic()
          {
-             call PixelGraphics::swa.println('saving graphic!');
+             call PixelGraphics::swa.print('saving graphic : ');
              let tile_count : Coord = 0;
              set tile_count = graphic().tiles()..size();
              call ui().begin_drawing();
@@ -399,7 +399,7 @@ object Harness
 
     proc save_tile()
          {
-             call PixelGraphics::swa.println('saving tile!');
+             call PixelGraphics::swa.print('saving tile : ');
              call ui().begin_drawing();
              let img : Image = ui().gen_image_color( t_res(), t_res(), bcolor() );
              foreach p : working_tile().pixels()

@@ -111,6 +111,7 @@ class Raylib {
         time_info = localtime (&raw_time);
 
         strftime(buffer, 256, "PixEd_%H%M%S.png", time_info);
+        printf( "%s\n", buffer );
         ExportImage( img, buffer );
     };
     void unload_image( Image img ) {
