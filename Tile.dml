@@ -24,5 +24,16 @@ object Tile
                     call p.set_color( self.graphic().background_color() );
                     call self.pixels_link( p );
                 };
+
+    proc        delete_yourself()
+                {
+                    foreach pxl : pixels()
+                        => call pxl.delete_yourself( );
+                    foreach pxl : pixels()
+                        => call pixels_unlink( pxl );
+                    call self.graphic_unlink();
+                    set self = nil;
+                };
+
 };
 

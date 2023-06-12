@@ -24,5 +24,6 @@ domain PixelGraphics
     type        Label       : NumericType [ cpp_type='std::string'; ];
     type        ArgCount    : NumericType [ cpp_type='int'; ];
     type        ArgStrings  : TextType    [ cpp_type='char**'; ];
+    type        Filename    : TextType    [ cpp_type='std::string'; ];
     type        Boolean     : ProvidedType;
 };

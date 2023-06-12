@@ -10,6 +10,9 @@ object Harness
     attr        bcolor             : Color;
     attr        t_res              : Coord;  "number of tile pixels in Tile side"
     attr        p_span             : Coord;  "number of screen pixels in Pixel or ColorWell"
+    attr        do_load_graphic    : Boolean;
+    attr        load_filename      : Filename;
+    attr        load_tile_count    : Coord;
     attr        x_tile_view        : Coord;
     attr        y_tile_view        : Coord;
     attr        x_mini_view        : Coord;
@@ -20,8 +23,6 @@ object Harness
     attr        y_save_graphic     : Coord;
     attr        x_save_tile        : Coord;
     attr        y_save_tile        : Coord;
-    attr        x_load_tile        : Coord;
-    attr        y_load_tile        : Coord;
     attr        x_add_tile         : Coord;
     attr        y_add_tile         : Coord;
     attr        x_del_tile         : Coord;
@@ -42,6 +43,10 @@ object Harness
 
     proc main( arg_count : ArgCount, arg_strings : ArgStrings) : ExitCode 
          {
+             call PixelGraphics::swa.print( 'Usage: ' );
+             call PixelGraphics::swa.print( arg_strings[0] );
+             call PixelGraphics::swa.println( ' [<tile resolution> <pixel_resolution> [<filename> <tile_count>]]' );
+
              let the_harness : Harness = new Harness;
              let the_ui      : Raylib  = new Raylib;
              let the_graphic : Graphic = new Graphic;
@@ -49,11 +54,19 @@ object Harness
 
              call the_harness.set_t_res( 32 );   "number of pixels in a tile side"
              call the_harness.set_p_span( 24 );  "number of screen pixels in a tile pixel"
+             call the_harness.set_do_load_graphic( false );
 
              if   arg_count > 1 
                   => call the_harness.set_t_res( std::atoi( arg_strings[1] ) );
              if   arg_count > 2 
                   => call the_harness.set_p_span( std::atoi( arg_strings[2] ) );
+             if   arg_count > 3 
+                  => call the_harness.set_do_load_graphic( true );
+             if   arg_count > 3 
+                  => call the_harness.set_load_filename( arg_strings[3] );
+             if   arg_count > 4 
+                  => call the_harness.set_load_tile_count( std::atoi( arg_strings[4] ) );
+                   
 
              call PixelGraphics::swa.print(arg_strings[0]);
              call PixelGraphics::swa.print(' tile resolution: ');
@@ -101,8 +114,6 @@ object Harness
              call set_y_save_graphic( (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
              call set_x_save_tile(    (3*p_span()) + (t_res()*p_span()) + (2*p_span()) );
              call set_y_save_tile(    (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
-             call set_x_load_tile(    (3*p_span()) + (t_res()*p_span()) + (3*p_span()) );
-             call set_y_load_tile(    (3*p_span()) + (t_res()*p_span()) - (1*p_span()) );
          };
 
     proc start()
@@ -111,6 +122,10 @@ object Harness
                                          (3 * p_span()) + (t_res() * p_span()) + (3*p_span()),
                                          'PixelGraphics domain harness' );
              call ui().set_target_fps( 90 );
+
+             "load an existing file?"
+             if do_load_graphic() 
+                => call load_graphic();
 
              "loop infinitely, until window closed"
                  foreach i : FrameCount | 0 <= i and !ui().window_should_close()
@@ -177,10 +192,6 @@ object Harness
             if  mpressed() and save_tile_hit => save_tile();
 
             "--------------------------------------------------"
-            let load_button_hit : Boolean = mdown_on_tile_at( x_load_tile(), y_load_tile() );
-            if  mpressed() and load_button_hit => load_graphic();
-
-            "--------------------------------------------------"
             if mpressed() => call set_mpressed( false ); 
                   "mouse press handled, so clear it,
                    otherwise we get activations a 60 fps"
@@ -203,7 +214,6 @@ object Harness
                "call draw_button_at( '-',  x_del_tile(),  y_del_tile() );"
                 call draw_button_at( 'G',  x_save_graphic(), y_save_graphic() );
                 call draw_button_at( 'T',  x_save_tile(), y_save_tile() );
-               "call draw_button_at( 'L',  x_load_tile(), y_load_tile() );"
 
             call ui().end_drawing();
             "--------------------------------------------------"
@@ -411,6 +421,33 @@ object Harness
 
     proc load_graphic()
          {
-             call PixelGraphics::swa.println('load file!');
+             pre do_load_graphic();
+             call PixelGraphics::swa.println('loading file!');
+             call graphic().tiles_unlink( graphic().tiles()[0] );
+             let full_image : Image = ui().load_image( load_filename() );
+             foreach tile_n : Coord | 0 <= tile_n and tile_n < load_tile_count() 
+                => call load_tile_from_image( tile_n, full_image );
+             call set_working_tile_index( 0 );
+             call working_tile_link( graphic().tiles()[0] );
+             
+         };
+    proc load_tile_from_image( n : Coord, full_image : Image )
+         {
+             let new_tile : Tile = new Tile;
+             call graphic().tiles_link( new_tile );
+             let tile_image : Image = ui().image_from_image( 
+                    full_image, 
+                    Rectangle{ (float)n*t_res(), (float)0, (float)t_res(), (float)t_res() } );
+             foreach pixel_index : Coord | 0 <= pixel_index and pixel_index < (t_res()*t_res())
+                =>
+                    load_tile_pixel_from_image( new_tile, pixel_index, tile_image );
+         };
+    proc load_tile_pixel_from_image( tile : Tile, idx : Coord, image : Image )
+         {
+             let  pxl : Pixel = new Pixel;
+             call pxl.set_x( idx%t_res() );
+             call pxl.set_y( idx/t_res() );
+             call pxl.set_color( ui().get_image_color( image, pxl.x(), pxl.y() ) );
+             call tile.pixels_link( pxl );
          };
 };

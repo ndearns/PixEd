@@ -22,4 +22,5 @@ object Graphic
                     call self.tiles_link( tile );
                     call tile.initialise( self );
                 };
+
 };

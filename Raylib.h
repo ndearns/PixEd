@@ -99,6 +99,9 @@ class Raylib {
     Image load_image( std::string filename ) {
         return LoadImage( filename.data() );
     };
+    Image image_from_image( Image img, Rectangle rect ) {
+        return ImageFromImage( img, rect );
+    };
     Image gen_image_color( int width, int height, Color color ) {
         return GenImageColor( width, height, color );
     };
@@ -119,6 +122,9 @@ class Raylib {
     };
     void image_draw_pixel( Image* dst, int posX, int posY, Color color ) {
         ImageDrawPixel( dst, posX, posY, color );
+    };
+    Color get_image_color( Image img, int posX, int posY ) {
+        return GetImageColor( img, posX, posY );
     };
     void draw_image( Image image, int x, int y, Color tint ) {
         Texture t = LoadTextureFromImage( image );
