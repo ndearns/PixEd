@@ -105,6 +105,9 @@ class Raylib {
     Image gen_image_color( int width, int height, Color color ) {
         return GenImageColor( width, height, color );
     };
+    bool image_is_ready( Image img ) {
+        return IsImageReady( img );
+    };
     void export_image( Image img ) {
         static char buffer[256];
         time_t raw_time;

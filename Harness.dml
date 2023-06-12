@@ -13,6 +13,7 @@ object Harness
     attr        do_load_graphic    : Boolean;
     attr        load_filename      : Filename;
     attr        load_tile_count    : Coord;
+    attr        exe_name           : Filename;
     attr        x_tile_view        : Coord;
     attr        y_tile_view        : Coord;
     attr        x_mini_view        : Coord;
@@ -43,9 +44,6 @@ object Harness
 
     proc main( arg_count : ArgCount, arg_strings : ArgStrings) : ExitCode 
          {
-             call PixelGraphics::swa.print( 'Usage: ' );
-             call PixelGraphics::swa.print( arg_strings[0] );
-             call PixelGraphics::swa.println( ' [<tile resolution> <pixel_resolution> [<filename> <tile_count>]]' );
 
              let the_harness : Harness = new Harness;
              let the_ui      : Raylib  = new Raylib;
@@ -55,6 +53,7 @@ object Harness
              call the_harness.set_t_res( 32 );   "number of pixels in a tile side"
              call the_harness.set_p_span( 24 );  "number of screen pixels in a tile pixel"
              call the_harness.set_do_load_graphic( false );
+             call the_harness.set_exe_name( arg_strings[0] );
 
              if   arg_count > 1 
                   => call the_harness.set_t_res( std::atoi( arg_strings[1] ) );
@@ -92,6 +91,20 @@ object Harness
              call the_harness.ui_unlink();
 
              return ExitCode::Ok;
+         };
+
+    proc abort( msg : Message )
+    {
+             call PixelGraphics::swa.print( 'Aborting : ' );
+             call PixelGraphics::swa.println( msg );
+             call usage();
+             call exit( ExitCode::Error );
+    };
+    proc usage()
+         {
+             call PixelGraphics::swa.print( 'Usage: ' );
+             call PixelGraphics::swa.print( exe_name() );
+             call PixelGraphics::swa.println( ' [<tile resolution> <pixel_resolution> [<filename> <tile_count>]]' );
          };
 
     proc initialise()
@@ -425,6 +438,8 @@ object Harness
              call PixelGraphics::swa.println('loading file!');
              call graphic().tiles_unlink( graphic().tiles()[0] );
              let full_image : Image = ui().load_image( load_filename() );
+             if  ! ui().image_is_ready( full_image )
+                 => call abort( 'Bad graphic data.  Check filename/command line arguments are correct.' );
              foreach tile_n : Coord | 0 <= tile_n and tile_n < load_tile_count() 
                 => call load_tile_from_image( tile_n, full_image );
              call set_working_tile_index( 0 );
