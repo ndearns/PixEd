@@ -1,33 +1,42 @@
-CC = g++
-CCFLAGS = -std=c++2a -g -Wall -Ofast
+CC       = g++
+CCFLAGS  = -std=c++2a -g -Wall -Ofast
 GEN_MODE = async
-DML_DOM = PixelGraphics
-DML_OBJS= Harness Graphic Tile Pixel Palette ColorWell
-LIBS= -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+DOM_NAME = PixelGraphics
+DML_DOM  = PixelGraphics.dml
+DML_OBJS = Harness.dml Graphic.dml Tile.dml Pixel.dml Palette.dml ColorWell.dml 
+CPP_OBJS = $(DML_OBJS:.dml=.cpp)
+H_OBJS   = $(DML_OBJS:.dml=.h)
+LIB_OBJS = $(CPP_OBJS:.cpp=.o)
+INC_DIRS = -I ${DML}/SWA
+LIBS     = -L${DML}/SWA -lSWA -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
-run: EventQueue.o *.dml $(DML_DOM)Provided.h Raylib.h
-	dml $(DML_DOM) $(GEN_MODE)
-	for obj in $(DML_OBJS); do \
-		$(CC) $(CCFLAGS) -c $$obj.cpp -o $$obj.o; \
-	done
-	$(CC) $(CCFLAGS) *.o -o run $(LIBS)
+lib: $(filter-out Harness.o,$(LIB_OBJS)) $(DOM_NAME)Provided.h
+	ar -rcs lib$(DOM_NAME).a $(filter-out Harness.o,$(LIB_OBJS))
+
+run: $(LIB_OBJS) $(DOM_NAME)Provided.h
+	$(CC) $(CCFLAGS) $(LIB_OBJS) -o run $(LIBS)
 
 gen: *.dml
-	dml $(DML_DOM) $(GEN_MODE)
+	dml $(DOM_NAME) $(GEN_MODE)
 
-%.o: %.cpp %.h
-	$(CC) $(CCFLAGS) -c $< -o $@
+$(LIB_OBJS): $(CPP_OBJS)
 
-.PHONY: tidy
-tidy:
-	rm -f *.o $(DML_DOM).h
-	for obj in $(DML_OBJS); do \
+$(CPP_OBJS): $(DML_OBJS) $(DOM_NAME).dml $(DOM_NAME)Provided.h
+	dml $(DOM_NAME) $(GEN_MODE)             
+
+.cpp.o:                                 
+	$(CC) $(CCFLAGS) $(INC_DIRS) -c $< -o $@           
+
+.PHONY: clean tidy
+clean:
+	rm -f *.o ./run lib$(DOM_NAME).a $(DOM_NAME).h
+	for obj in $(basename $(DML_OBJS)); do \
 		rm -f $$obj.cpp $$obj.h; \
 	done
-.PHONY: clean
-clean:
-	rm -f *.o ./run $(DML_DOM).h
-	for obj in $(DML_OBJS); do \
-		rm -f $$obj.cpp $$obj.h; \
+
+tidy:
+	rm -f *.o $(DOM_NAME).h
+	for obj in $(basename $(DML_OBJS)); do \
+		rm -f $$obj.cpp; \
 	done
 

@@ -460,8 +460,8 @@ object Harness
     proc load_tile_pixel_from_image( tile : Tile, idx : Coord, image : Image )
          {
              let  pxl : Pixel = new Pixel;
-             call pxl.set_x( idx%t_res() );
-             call pxl.set_y( idx/t_res() );
+             call pxl.set_x( idx % t_res() );
+             call pxl.set_y( idx / t_res() );
              call pxl.set_color( ui().get_image_color( image, pxl.x(), pxl.y() ) );
              call tile.pixels_link( pxl );
          };

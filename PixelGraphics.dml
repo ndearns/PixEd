@@ -1,7 +1,7 @@
 domain PixelGraphics
 {
     object      Harness;
-    object      Raylib [ archetypes='provided'; ];
+    object      Raylib      [ archetypes='provided'; ];
     object      Graphic;
     object      Tile;
     object      Pixel;
